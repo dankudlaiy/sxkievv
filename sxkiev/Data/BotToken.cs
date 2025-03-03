@@ -1,14 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace sxkiev.Data;
 
 public class BotToken
 {
     public int Id { get; set; }
-    public string Token { get; set; }
-    public int UserId { get; set; }
-    public DateTime CreatedAt { get; set; }
-    
+    [MaxLength(120)]
+    public Guid Token { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public long UserId { get; set; }
     [ForeignKey(nameof(UserId))]
-    public virtual required SxKievUser User { get; set; }
+    public virtual SxKievUser User { get; set; }
 }

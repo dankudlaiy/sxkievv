@@ -17,9 +17,9 @@ public class UsersService : IUsersService
         return await _userRepository.GetAllAsync();
     }
 
-    public async Task<SxKievUser?> GetUserByIdAsync(int id)
+    public async Task<SxKievUser?> GetUserByIdAsync(long id)
     {
-        return await _userRepository.GetByIdAsync(id);
+        return await _userRepository.FirstOrDefaultAsync(x => x.TelegramId == id);
     }
 
     public async Task AddUserAsync(SxKievUser user)

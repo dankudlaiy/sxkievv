@@ -1,4 +1,6 @@
-﻿using Telegram.Bot;
+﻿using sxkiev.Models;
+using sxkiev.Services.Auth;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 // ReSharper disable ConvertToPrimaryConstructor
@@ -8,9 +10,11 @@ namespace sxkiev;
 public class BotHostedService : BackgroundService
 {
     private readonly TelegramBotClient _botClient;
+    private readonly IAuthService _authService;
 
-    public BotHostedService(IConfiguration configuration)
+    public BotHostedService(IConfiguration configuration, IAuthService authService)
     {
+        _authService = authService;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
     }
 
@@ -33,13 +37,35 @@ public class BotHostedService : BackgroundService
         await Task.Delay(-1, stoppingToken);
     }
 
-    private static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Message?.Text == "/start")
         {
             await botClient.SendMessage(
                 chatId: update.Message.Chat.Id,
                 text: "Welcome to the bot! Type a command.",
+                cancellationToken: cancellationToken);
+        }
+
+        if (update.Message?.Text == "/auth")
+        {
+            var userId = update.Message.From?.Id;
+            var username = update.Message.From?.Username;
+
+            if (userId is null || username is null)
+            {
+                return;
+            }
+
+            var token = await _authService.CreateLoginLink(new CreateLoginLinkInputModel
+            {
+                UserId = userId.Value,
+                Username = username
+            });
+            
+            await botClient.SendMessage(
+                chatId: update.Message.Chat.Id,
+                text: $"Your auth token: {token}",
                 cancellationToken: cancellationToken);
         }
     }
