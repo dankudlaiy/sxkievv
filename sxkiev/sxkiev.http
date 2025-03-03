@@ -1,0 +1,6 @@
+@sxkiev_HostAddress = http://localhost:5193
+
+GET {{sxkiev_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

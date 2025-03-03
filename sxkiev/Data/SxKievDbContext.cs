@@ -1,0 +1,24 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace sxkiev.Data;
+
+public class SxKievDbContext : DbContext
+{
+    public SxKievDbContext(DbContextOptions<SxKievDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<SxKievUser> Users { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<SxKievUser>()
+            .HasKey(x => x.TelegramId);
+
+        modelBuilder.Entity<SxKievUser>()
+            .HasIndex(x => x.TelegramId)
+            .IsUnique();
+    }
+}
