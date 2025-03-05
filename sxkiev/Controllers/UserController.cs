@@ -8,26 +8,26 @@ namespace sxkiev.Controllers;
 [Authorize(Roles = "admin")]
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController : ControllerBase
+public class UserController : ControllerBase
 {
-    private readonly IUsersService _usersService;
+    private readonly IUserService _userService;
 
-    public UsersController(IUsersService usersService)
+    public UserController(IUserService userService)
     {
-        _usersService = usersService;
+        _userService = userService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
-        var users = await _usersService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync();
         return Ok(users);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(int id)
     {
-        var user = await _usersService.GetUserByIdAsync(id);
+        var user = await _userService.GetUserByIdAsync(id);
         if (user == null)
             return NotFound();
 
@@ -37,17 +37,14 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddUser([FromBody] SxKievUser user)
     {
-        await _usersService.AddUserAsync(user);
+        await _userService.AddUserAsync(user);
         return CreatedAtAction(nameof(GetUserById), new { id = user.TelegramId }, user);
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] SxKievUser user)
+    [HttpPut]
+    public async Task<IActionResult> UpdateUser([FromBody] SxKievUser user)
     {
-        if (id != user.TelegramId)
-            return BadRequest();
-
-        await _usersService.UpdateUserAsync(user);
+        await _userService.UpdateUserAsync(user);
         return NoContent();
     }
 }

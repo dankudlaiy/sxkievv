@@ -9,6 +9,8 @@ public class SxKievDbContext : DbContext
     }
 
     public DbSet<SxKievUser> Users { get; set; }
+    public DbSet<SxKievProfile> Profiles { get; set; }
+    public DbSet<BotToken> BotTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,7 +20,7 @@ public class SxKievDbContext : DbContext
             .HasKey(x => x.TelegramId);
 
         modelBuilder.Entity<SxKievUser>()
-            .HasIndex(x => x.TelegramId)
-            .IsUnique();
+            .Property(x => x.TelegramId)
+            .ValueGeneratedNever();
     }
 }

@@ -10,11 +10,11 @@ namespace sxkiev;
 public class BotHostedService : BackgroundService
 {
     private readonly TelegramBotClient _botClient;
-    private readonly IAuthService _authService;
+    private readonly IServiceProvider _serviceProvider;
 
-    public BotHostedService(IConfiguration configuration, IAuthService authService)
+    public BotHostedService(IConfiguration configuration, IServiceProvider serviceProvider)
     {
-        _authService = authService;
+        _serviceProvider = serviceProvider;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
     }
 
@@ -33,7 +33,7 @@ public class BotHostedService : BackgroundService
             HandleErrorAsync,
             receiverOptions,
             stoppingToken);
-        
+
         await Task.Delay(-1, stoppingToken);
     }
 
@@ -57,12 +57,15 @@ public class BotHostedService : BackgroundService
                 return;
             }
 
-            var token = await _authService.CreateLoginLink(new CreateLoginLinkInputModel
+            using var scope = _serviceProvider.CreateScope();
+            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+
+            var token = await authService.CreateLoginLink(new CreateLoginLinkInputModel
             {
                 UserId = userId.Value,
                 Username = username
             });
-            
+
             await botClient.SendMessage(
                 chatId: update.Message.Chat.Id,
                 text: $"Your auth token: {token}",

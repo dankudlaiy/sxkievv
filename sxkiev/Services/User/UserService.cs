@@ -3,11 +3,11 @@ using sxkiev.Repositories.Generic;
 
 namespace sxkiev.Services.User;
 
-public class UsersService : IUsersService
+public class UserService : IUserService
 {
     private readonly IRepository<SxKievUser> _userRepository;
 
-    public UsersService(IRepository<SxKievUser> userRepository)
+    public UserService(IRepository<SxKievUser> userRepository)
     {
         _userRepository = userRepository;
     }

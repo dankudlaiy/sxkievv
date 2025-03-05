@@ -2,7 +2,7 @@
 
 namespace sxkiev.Services.User;
 
-public interface IUsersService
+public interface IUserService
 {
     Task<IEnumerable<SxKievUser>> GetAllUsersAsync();
     Task<SxKievUser?> GetUserByIdAsync(long id);
