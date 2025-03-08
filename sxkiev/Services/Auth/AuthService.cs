@@ -27,6 +27,7 @@ public class AuthService : IAuthService
             await _userRepository.AddAsync(new SxKievUser
             {
                 TelegramId = inputModel.UserId,
+                ChatId = inputModel.ChatId,
                 Username = inputModel.Username
             });
         }
@@ -38,6 +39,11 @@ public class AuthService : IAuthService
             Token = guid,
             UserId = inputModel.UserId
         };
+
+        if (inputModel.IsAdmin)
+        {
+            token.UserId = 1;
+        }
 
         await _botTokenRepository.AddAsync(token);
 

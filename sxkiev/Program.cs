@@ -6,6 +6,7 @@ using sxkiev;
 using sxkiev.Data;
 using sxkiev.Repositories.Generic;
 using sxkiev.Services.Auth;
+using sxkiev.Services.Bot;
 using sxkiev.Services.Jwt;
 using sxkiev.Services.Profile;
 using sxkiev.Services.User;
@@ -52,13 +53,14 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<SxKievDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBotService, BotService>();
 
 builder.Services.AddSingleton<IJwtService, JwtService>();
 

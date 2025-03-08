@@ -5,6 +5,7 @@ namespace sxkiev.Data;
 public class SxKievUser
 {
     public long TelegramId { get; set; }
+    public long ChatId { get; set; }
     [MaxLength(50)]
     public required string Username { get; set; }
     public bool IsAdmin { get; set; }
