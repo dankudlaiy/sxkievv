@@ -266,6 +266,19 @@ public class BotHostedService : BackgroundService
                     text: $"Деп на {dep.Amount} был подтвержден",
                     cancellationToken: cancellationToken);
             }
+
+            if (update.CallbackQuery?.Data?.StartsWith("approve_profile_") == true)
+            {
+                var profileId = Guid.Parse(update.CallbackQuery.Data.Split("_")[2]);
+                
+                using var scope = _serviceProvider.CreateScope();
+                var botService = scope.ServiceProvider.GetRequiredService<IBotService>();
+                
+                await botService.ApproveProfile(profileId);
+                
+                await _botClient.DeleteMessage(update.CallbackQuery.Message!.Chat.Id, update.CallbackQuery.Message.Id,
+                    cancellationToken: cancellationToken);
+            }
             
             if (update.CallbackQuery?.Data?.StartsWith("deny_replenish_") == true)
             {
@@ -285,6 +298,19 @@ public class BotHostedService : BackgroundService
                 await botClient.SendMessage(
                     chatId: dep.ChatId,
                     text: $"Деп на {dep.Amount} был отклонен",
+                    cancellationToken: cancellationToken);
+            }
+            
+            if (update.CallbackQuery?.Data?.StartsWith("deny_profile_") == true)
+            {
+                var profileId = Guid.Parse(update.CallbackQuery.Data.Split("_")[2]);
+                
+                using var scope = _serviceProvider.CreateScope();
+                var botService = scope.ServiceProvider.GetRequiredService<IBotService>();
+                
+                await botService.RejectProfile(profileId);
+
+                await _botClient.DeleteMessage(update.CallbackQuery.Message!.Chat.Id, update.CallbackQuery.Message.Id,
                     cancellationToken: cancellationToken);
             }
         }

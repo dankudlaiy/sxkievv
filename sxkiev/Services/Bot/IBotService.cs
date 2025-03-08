@@ -11,4 +11,6 @@ public interface IBotService
     public Task<AddDetailsResponseModel> AddDetails(int depId, string details);
     public Task<AddDetailsResponseModel> ApproveDep(int depId);
     public Task<RejectDepResponseModel> RejectDep(int depId);
+    public Task ApproveProfile(Guid profileId);
+    public Task RejectProfile(Guid profileId);
 }

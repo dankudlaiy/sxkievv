@@ -8,11 +8,13 @@ public class BotService : IBotService
 {
     private readonly IRepository<SxKievUser> _userRepository;
     private readonly IRepository<Dep> _depRepository;
+    private readonly IRepository<SxKievProfile> _profileRepository;
 
-    public BotService(IRepository<SxKievUser> userRepository, IRepository<Dep> depRepository)
+    public BotService(IRepository<SxKievUser> userRepository, IRepository<Dep> depRepository, IRepository<SxKievProfile> profileRepository)
     {
         _userRepository = userRepository;
         _depRepository = depRepository;
+        _profileRepository = profileRepository;
     }
 
     public async Task<UserProfileResponseModel> GetUserProfile(long userId)
@@ -125,5 +127,25 @@ public class BotService : IBotService
             Date = dep.CreatedAt,
             Username = user.Username
         };
+    }
+
+    public async Task ApproveProfile(Guid profileId)
+    {
+        var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == profileId);
+        
+        if (profile is null) throw new Exception("No profile found");
+
+        profile.IsActive = true;
+        await _profileRepository.UpdateAsync(profile);
+    }
+
+    public async Task RejectProfile(Guid profileId)
+    {
+        var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == profileId);
+        
+        if (profile is null) throw new Exception("No profile found");
+
+        profile.IsRejected = true;
+        await _profileRepository.UpdateAsync(profile);
     }
 }

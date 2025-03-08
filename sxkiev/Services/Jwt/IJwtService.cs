@@ -4,6 +4,6 @@ namespace sxkiev.Services.Jwt;
 
 public interface IJwtService
 {
-    string GenerateToken(string username, string role);
+    string GenerateToken(long userId, string role);
     ClaimsPrincipal? ValidateToken(string token);
 }

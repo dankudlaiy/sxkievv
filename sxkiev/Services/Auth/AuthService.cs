@@ -22,7 +22,7 @@ public class AuthService : IAuthService
     {
         var user = await _userRepository.FirstOrDefaultAsync(x => x.TelegramId == inputModel.UserId);
 
-        if (user is null)
+        if (user is null && !inputModel.IsAdmin)
         {
             await _userRepository.AddAsync(new SxKievUser
             {
@@ -42,7 +42,12 @@ public class AuthService : IAuthService
 
         if (inputModel.IsAdmin)
         {
-            token.UserId = 1;
+            var admin = await _userRepository.FirstOrDefaultAsync(x => x.IsAdmin);
+
+            if (admin != null)
+            {
+                token.UserId = admin.TelegramId;
+            }
         }
 
         await _botTokenRepository.AddAsync(token);
@@ -74,7 +79,7 @@ public class AuthService : IAuthService
             return response;
         }
 
-        var authToken = _jwtService.GenerateToken(user.Username, user.IsAdmin ? "admin" : "user");
+        var authToken = _jwtService.GenerateToken(user.TelegramId, user.IsAdmin ? "admin" : "user");
 
         response.IsSuccess = true;
         response.ErrorMessage = null;
