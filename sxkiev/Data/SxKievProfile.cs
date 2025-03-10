@@ -16,6 +16,11 @@ public class SxKievProfile
     public int Weight { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime ExpirationDate { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; }
+    public bool IsRejected { get; set; }
+    public bool IsBanned { get; set; }
+    public int Priority { get; set; }
     public long UserId { get; set; }
     [ForeignKey(nameof(UserId))]
     public virtual SxKievUser User { get; set; }

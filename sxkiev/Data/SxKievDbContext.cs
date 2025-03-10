@@ -11,6 +11,7 @@ public class SxKievDbContext : DbContext
     public DbSet<SxKievUser> Users { get; set; }
     public DbSet<SxKievProfile> Profiles { get; set; }
     public DbSet<BotToken> BotTokens { get; set; }
+    public DbSet<Dep> Deps { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

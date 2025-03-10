@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using sxkiev.Services.Profile;
 using sxkiev.Data;
+using sxkiev.Models;
 
 namespace sxkiev.Controllers;
 
@@ -35,8 +37,21 @@ public class ProfileController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddProfile([FromBody] SxKievProfile profile)
+    public async Task<IActionResult> AddProfile([FromBody] AddProfileInputModel profileInputModel)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return BadRequest();
+        var profile = new SxKievProfile
+        {
+            Name = profileInputModel.Name,
+            Description = profileInputModel.Description,
+            UserId = long.Parse(userId),
+            Age = profileInputModel.Age,
+            Weight = profileInputModel.Weight,
+            Breast = profileInputModel.Breast,
+            Height = profileInputModel.Height
+        };
+
         await _profileService.AddProfileAsync(profile);
         return CreatedAtAction(nameof(GetProfileById), new { id = profile.Id }, profile);
     }
