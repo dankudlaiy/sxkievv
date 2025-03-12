@@ -1,4 +1,6 @@
-﻿using sxkiev.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using sxkiev.Data;
+using sxkiev.Models;
 using sxkiev.Repositories.Generic;
 using Telegram.Bot;
 
@@ -20,6 +22,40 @@ public class ProfileService : IProfileService
     public async Task<IEnumerable<SxKievProfile>> GetAllProfilesAsync()
     {
         return await _profileRepository.GetAllAsync();
+    }
+
+    public async Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input)
+    {
+        var query = _profileRepository.Query(x =>
+                x.IsActive && x.IsRejected != true && x.IsBanned != true && x.ExpirationDate > DateTime.UtcNow)
+            .OrderByDescending(x => x.Priority);
+
+        var count = await query.CountAsync();
+
+        var mapped = await query
+            .Skip(input.Skip).Take(input.Take)
+            .Select(x => new ProfileResponseModel
+            {
+                Age = x.Age,
+                Breast = x.Breast,
+                CreatedAt = x.CreatedAt,
+                Description = x.Description,
+                ExpirationDate = x.ExpirationDate,
+                Height = x.Height,
+                Id = x.Id,
+                Name = x.Name,
+                Priority = x.Priority,
+                UpdatedAt = x.UpdatedAt,
+                Weight = x.Weight
+            }).ToListAsync();
+
+        var responseModel = new SearchProfilesResponseModel
+        {
+            TotalCount = count,
+            Profiles = mapped
+        };
+
+        return responseModel;
     }
 
     public async Task<SxKievProfile?> GetProfileAsync(Guid id)

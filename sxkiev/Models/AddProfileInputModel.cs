@@ -12,4 +12,5 @@ public class AddProfileInputModel
     public int Height { get; set; }
     public int Breast { get; set; }
     public int Weight { get; set; }
+    public int[]? Media { get; set; }
 }

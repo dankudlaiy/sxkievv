@@ -8,6 +8,7 @@ using sxkiev.Repositories.Generic;
 using sxkiev.Services.Auth;
 using sxkiev.Services.Bot;
 using sxkiev.Services.Jwt;
+using sxkiev.Services.Media;
 using sxkiev.Services.Profile;
 using sxkiev.Services.User;
 
@@ -61,6 +62,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBotService, BotService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
