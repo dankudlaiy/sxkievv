@@ -26,11 +26,22 @@ public class ProfileService : IProfileService
         return await _profileRepository.GetAllAsync();
     }
 
+    public async Task<IEnumerable<SxKievProfile?>> GetProfilesByUser(long userId, int skip, int take)
+    {
+        return await _profileRepository
+            .Query(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+    }
+
     public async Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input)
     {
         var query = _profileRepository.Query(x =>
                 x.IsActive && x.IsRejected != true && x.IsBanned != true && x.ExpirationDate > DateTime.UtcNow)
-            .OrderByDescending(x => x.Priority);
+            .OrderByDescending(x => x.Priority)
+            .ThenByDescending(x => x.CreatedAt);
 
         var count = await query.CountAsync();
 

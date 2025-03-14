@@ -20,18 +20,60 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProfiles()
+    public async Task<IActionResult> GetProfiles([FromQuery] int skip, [FromQuery] int take)
     {
-        var profiles = await _profileService.GetAllProfilesAsync();
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return BadRequest();
+
+        var profiles = await _profileService.GetProfilesByUser(long.Parse(userId), skip, take);
+
         return Ok(profiles);
     }
 
+    [HttpGet("search")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SearchProfiles(
+        [FromQuery] double minPrice, [FromQuery] double maxPrice, 
+        [FromQuery] int minAge, [FromQuery] int maxAge,
+        [FromQuery] int minWeight, [FromQuery] int maxWeight,
+        [FromQuery] int minHeight, [FromQuery] int maxHeight,
+        [FromQuery] int breastSize, [FromQuery] bool apartment, [FromQuery] bool toClient,
+        [FromQuery] District district, [FromQuery] Favour favour,
+        [FromQuery] int skip, [FromQuery] int take
+        )
+    {
+        var response = await _profileService.SearchProfilesAsync(new SearchProfilesInputModel
+        {
+            MinPrice = minPrice,
+            MaxPrice = maxPrice,
+            MinWeight = minWeight,
+            MaxWeight = maxWeight,
+            MinAge = minAge,
+            MaxAge = maxAge,
+            MinHeight = minHeight,
+            MaxHeight = maxHeight,
+            BreastSize = breastSize,
+            Apartment = apartment,
+            ToClient = toClient,
+            District = district,
+            Favour = favour,
+            Skip = skip,
+            Take = take
+        });
+
+        return Ok(response);
+    }
+
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetProfileById(Guid id)
     {
         var profile = await _profileService.GetProfileAsync(id);
+
         if (profile == null)
+        {
             return NotFound();
+        }
 
         return Ok(profile);
     }
@@ -41,6 +83,7 @@ public class ProfileController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null) return BadRequest();
+
         var profile = new SxKievProfile
         {
             Name = profileInputModel.Name,
@@ -49,7 +92,12 @@ public class ProfileController : ControllerBase
             Age = profileInputModel.Age,
             Weight = profileInputModel.Weight,
             Breast = profileInputModel.Breast,
-            Height = profileInputModel.Height
+            Height = profileInputModel.Height,
+            HourPrice = profileInputModel.HourPrice,
+            TwoHourPrice = profileInputModel.TwoHourPrice,
+            NightPrice = profileInputModel.NightPrice,
+            Apartment = profileInputModel.Apartment,
+            ToClient = profileInputModel.ToClient
         };
 
         await _profileService.AddProfileAsync(profile);

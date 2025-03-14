@@ -85,6 +85,9 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.WebHost.UseKestrel()    
+    .UseUrls("http://0.0.0.0:7228");
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
