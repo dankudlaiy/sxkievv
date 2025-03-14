@@ -14,7 +14,7 @@ using sxkiev.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHostedService<BotHostedService>();
+// builder.Services.AddHostedService<BotHostedService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
