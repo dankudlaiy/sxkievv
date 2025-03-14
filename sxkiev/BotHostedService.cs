@@ -28,7 +28,7 @@ public class BotHostedService : BackgroundService
     {
         _serviceProvider = serviceProvider;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
-        _adminChatId = long.Parse(_serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
+        _adminChatId = long.Parse(configuration["AdminChatId"]!);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
