@@ -8,13 +8,15 @@ namespace sxkiev.Services.Profile;
 
 public class ProfileService : IProfileService
 {
+    private readonly IRepository<SxKievUser> _userRepository;
     private readonly IRepository<SxKievProfile> _profileRepository;
     private readonly TelegramBotClient _botClient;
     private readonly long _adminChatId;
 
-    public ProfileService(IRepository<SxKievProfile> profileRepository, IConfiguration configuration, IServiceProvider serviceProvider)
+    public ProfileService(IRepository<SxKievProfile> profileRepository, IConfiguration configuration, IServiceProvider serviceProvider, IRepository<SxKievUser> userRepository)
     {
         _profileRepository = profileRepository;
+        _userRepository = userRepository;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
         _adminChatId = long.Parse(serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
     }
@@ -70,8 +72,18 @@ public class ProfileService : IProfileService
 
     public async Task AddProfileAsync(SxKievProfile profile)
     {
-        var createdProfile = await _profileRepository.AddAsync(profile);
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.TelegramId == profile.UserId);
         
+        if (user is null) throw new Exception("User not found");
+
+        if (user.Balance < PricePolicy.Profile) throw new Exception("Not enough balance");
+
+        user.Balance -= PricePolicy.Profile;
+
+        var createdProfile = await _profileRepository.AddAsync(profile);
+
+        await _userRepository.UpdateAsync(user);
+
         var adminKeyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup([
             [
                 Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Опубликовать",

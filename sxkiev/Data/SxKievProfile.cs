@@ -16,7 +16,7 @@ public class SxKievProfile
     public int Weight { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime ExpirationDate { get; set; } = DateTime.UtcNow;
+    public DateTime ExpirationDate { get; set; } = DateTime.UtcNow.AddDays(30);
     public bool IsActive { get; set; }
     public bool IsRejected { get; set; }
     public bool IsBanned { get; set; }
