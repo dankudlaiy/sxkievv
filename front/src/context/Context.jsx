@@ -7,9 +7,9 @@ const UserProvider = ({children}) => {
 
    useEffect(() => {
       const storedUser = localStorage.getItem("user")
-      if (storedUser) {
+
+      if (storedUser)
          setUser(JSON.parse(storedUser)) // Restore user from localStorage
-      }
    }, [])
 
    const login = (userData) => {
