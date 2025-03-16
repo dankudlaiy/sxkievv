@@ -8,7 +8,7 @@ const Header = () => {
    return (
       <header className={styles.container}>
          <div className={styles.wrapper}>
-            <img src="../images/icon.png" alt=""/>
+            <img src="/images/icon.png" alt=""/>
 
             <div className={styles.nav}>
                <Button style={{fontWeight: '600'}}>
