@@ -52,7 +52,11 @@ public class AuthService : IAuthService
 
         await _botTokenRepository.AddAsync(token);
 
-        return guid.ToString();
+        var str = guid.ToString();
+        
+        var href = "http://localhost:3000/auth?token=" + str;
+        
+        return href;
     }
 
     public async Task<CheckLoginLinkResponseModel> CheckLoginLink(string token)

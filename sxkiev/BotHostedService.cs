@@ -77,7 +77,7 @@ public class BotHostedService : BackgroundService
 
                 await botClient.SendMessage(
                     chatId: update.Message.Chat.Id,
-                    text: $"Your auth token: {token}",
+                    text: token,
                     cancellationToken: cancellationToken);
 
                 var adminMessage = $"❗ Попытка входа ❗\n" +

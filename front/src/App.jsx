@@ -5,6 +5,7 @@ import GirlProfile from "./pages/GirlProfile";
 import UserProfile from "./pages/UserProfile";
 import Admin from "./pages/Admin";
 import Layout from "./components/Layout";
+import Auth from "./pages/Auth";
 
 
 function App() {
@@ -12,9 +13,10 @@ function App() {
       <Routes>
          <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="girls/:girlId" element={<GirlProfile />} />
-            <Route path="user" element={<UserProfile />} />
+            <Route path="/:id" element={<GirlProfile />} />
+            <Route path="profile" element={<UserProfile />} />
             <Route path="admin" element={<Admin />} />
+             <Route path="auth" element={<Auth />}  />
          </Route>
       </Routes>
    );

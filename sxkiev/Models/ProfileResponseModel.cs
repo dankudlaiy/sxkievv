@@ -10,7 +10,11 @@ public class ProfileResponseModel
     public int Breast { get; set; }
     public int Weight { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime ExpirationDate { get; set; } = DateTime.UtcNow;
     public int Priority { get; set; }
+    public double HourPrice { get; set; }
+    public double TwoHourPrice { get; set; }
+    public double NightPrice { get; set; }
+    public bool Apartment { get; set; }
+    public bool ToClient { get; set; }
+    public IEnumerable<string> Media { get; set; }
 }

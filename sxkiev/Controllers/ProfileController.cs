@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sxkiev.Services.Profile;
 using sxkiev.Data;
 using sxkiev.Models;
+using sxkiev.Services.Media;
 
 namespace sxkiev.Controllers;
 
@@ -13,10 +14,12 @@ namespace sxkiev.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
+    private readonly IMediaService _mediaService;
 
-    public ProfileController(IProfileService profileService)
+    public ProfileController(IProfileService profileService, IMediaService mediaService)
     {
         _profileService = profileService;
+        _mediaService = mediaService;
     }
 
     [HttpGet]
@@ -33,12 +36,12 @@ public class ProfileController : ControllerBase
     [HttpGet("search")]
     [AllowAnonymous]
     public async Task<IActionResult> SearchProfiles(
-        [FromQuery] double minPrice, [FromQuery] double maxPrice, 
-        [FromQuery] int minAge, [FromQuery] int maxAge,
-        [FromQuery] int minWeight, [FromQuery] int maxWeight,
-        [FromQuery] int minHeight, [FromQuery] int maxHeight,
-        [FromQuery] int breastSize, [FromQuery] bool apartment, [FromQuery] bool toClient,
-        [FromQuery] District district, [FromQuery] Favour favour,
+        [FromQuery] double? minPrice, [FromQuery] double? maxPrice, 
+        [FromQuery] int? minAge, [FromQuery] int? maxAge,
+        [FromQuery] int? minWeight, [FromQuery] int? maxWeight,
+        [FromQuery] int? minHeight, [FromQuery] int? maxHeight,
+        [FromQuery] int? breastSize, [FromQuery] bool? apartment, [FromQuery] bool? toClient,
+        [FromQuery] District? district, [FromQuery] Favour? favour,
         [FromQuery] int skip, [FromQuery] int take
         )
     {
@@ -78,6 +81,12 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
+    [HttpGet("priority")]
+    public async Task<IActionResult> GetOrderByPriority([FromQuery] int priority)
+    {
+        return Ok(await _profileService.GetOrderByPriority(priority));
+    }
+
     [HttpPost]
     public async Task<IActionResult> AddProfile([FromBody] AddProfileInputModel profileInputModel)
     {
@@ -101,6 +110,15 @@ public class ProfileController : ControllerBase
         };
 
         await _profileService.AddProfileAsync(profile);
+
+        if (profileInputModel.Media is { Length: > 0 })
+        {
+            foreach (var media in profileInputModel.Media)
+            {
+                await _mediaService.AddMediaToProfileAsync(profile.Id, media);
+            }
+        }
+
         return CreatedAtAction(nameof(GetProfileById), new { id = profile.Id }, profile);
     }
 

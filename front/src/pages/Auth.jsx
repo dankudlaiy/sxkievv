@@ -1,18 +1,22 @@
 import {useEffect, useState} from "react"
 import styles from "./Home.module.sass"
-import {useParams} from "react-router-dom";
 
 
-const GirlProfile = () => {
-    const { id } = useParams();
-    const [profile, setProfile] = useState([])
+const Auth = () => {
+    // const [profiles, setProfiles] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        const fetchProfile = async () => {
+        const auth = async () => {
             try {
-                const response = await fetch(`http://192.168.101.41:7228/api/Profile/${id}`, {
+                const queryString = window.location.search;
+
+                const urlParams = new URLSearchParams(queryString);
+
+                const token = urlParams.get('token');
+
+                const response = await fetch(`http://192.168.101.41:7228/api/Auth?botToken=${token}`, {
                     method : "GET",
                     headers: {
                         "Content-Type": "*/*",
@@ -26,8 +30,11 @@ const GirlProfile = () => {
                 }
 
                 const data = await response.json();
-                if (data) {
-                    setProfile(data);
+
+                if (data.token) {
+                    localStorage.setItem('authToken', data.token);
+
+                    window.location.href = "/"
                 } else {
                     setError("Data format is incorrect");
                 }
@@ -38,27 +45,17 @@ const GirlProfile = () => {
             }
         }
 
-        fetchProfile()
+        auth()
     }, [])
 
-    if (loading) return <p>Loading...</p>
+    if (loading) return <p>Auth...</p>
     if (error) return <p>Error: {error}</p>
 
     return (
         <div className={styles.container}>
-            <h2>Profile</h2>
-            <div className={styles.profileList}>
-                <div key={profile.id} className={styles.profileCard}>
-                    {/*<img src={profile.image} alt={profile.name} className={styles.profileImage}/>*/}
-                    <h3>{profile.name}</ h3>
-                    <p>{profile.age} years old</p>
-                    <button onClick={() => {
-                        window.location.href = 'http://localhost:3000'
-                    }}>Go back</button>
-                </div>
-            </div>
+            Authorized, redirecting...
         </div>
     )
 }
 
-export default GirlProfile
+export default Auth

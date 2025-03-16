@@ -1,14 +1,17 @@
-﻿using sxkiev.Repositories.Generic;
+﻿using sxkiev.Data;
+using sxkiev.Repositories.Generic;
 
 namespace sxkiev.Services.Media;
 
 public class MediaService : IMediaService
 {
     private readonly IRepository<Data.Media> _mediaRepository;
-
-    public MediaService(IRepository<Data.Media> mediaRepository)
+    private readonly IRepository<ProfileMedia> _profileMediaRepository;
+    
+    public MediaService(IRepository<Data.Media> mediaRepository, IRepository<ProfileMedia> profileMediaRepository)
     {
         _mediaRepository = mediaRepository;
+        _profileMediaRepository = profileMediaRepository;
     }
 
     public async Task<List<Data.Media>> UploadMediaAsync(IFormFile[] files, long userId)
@@ -17,7 +20,7 @@ public class MediaService : IMediaService
         {
             throw new ArgumentException("No files were provided");
         }
-        
+
         var result = new List<Data.Media>();
 
         foreach (var file in files)
@@ -55,5 +58,16 @@ public class MediaService : IMediaService
         }
 
         return result;
+    }
+
+    public async Task AddMediaToProfileAsync(Guid profileId, int mediaId)
+    {
+        var profileMedia = new ProfileMedia
+        {
+            ProfileId = profileId,
+            MediaId = mediaId
+        };
+
+        await _profileMediaRepository.AddAsync(profileMedia);
     }
 }

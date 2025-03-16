@@ -52,7 +52,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
 
 builder.Services.AddDbContext<SxKievDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
@@ -88,6 +92,17 @@ builder.Services.AddAuthentication(options =>
 builder.WebHost.UseKestrel()    
     .UseUrls("http://0.0.0.0:7228");
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -96,6 +111,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowReact");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
