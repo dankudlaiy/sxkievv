@@ -1,6 +1,9 @@
 import React from 'react';
 import styles from './Filter.module.sass';
 import Select from "./Select"
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import {faMagnifyingGlass, faUser} from "@fortawesome/free-solid-svg-icons"
+import Button from "./Button"
 
 
 const price_options = [
@@ -205,6 +208,11 @@ const Filter = () => {
          <Select title="Принимает" options={accepts_options}/>
          <Select title="Райно и Метро" options={district_metro_options}/>
          <Select title="Услуги" options={services_options}/>
+
+         <Button style={{fontWeight: '600'}}>
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            Поиск
+         </Button>
       </div>
    );
 };

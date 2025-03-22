@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react"
 import styles from "./Home.module.sass"
 import Filter from "../components/Filter"
+import AnketaList from "../containers/AnketaList"
 
 
 const Home = () => {
@@ -47,7 +48,9 @@ const Home = () => {
       <div className={styles.container}>
          <h2>Profiles List</h2>
           <div className={styles.profile_list}>
-              <Filter/>
+             <Filter/>
+
+             <AnketaList/>
           </div>
          <div className={styles.profileList}>
             {profiles.map((profile) => (
