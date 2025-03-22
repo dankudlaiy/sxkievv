@@ -8,7 +8,7 @@ namespace sxkiev.Services.Jwt;
 public class JwtService : IJwtService
 {
     private readonly string _secretKey;
-    private const int TokenLifetimeMinutes = 60;
+    private const int TokenLifetimeMinutes = 180;
 
     public JwtService(IConfiguration configuration)
     {
