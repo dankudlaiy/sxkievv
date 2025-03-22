@@ -6,6 +6,7 @@ const Admin = () => {
     const [isAdmin, setIsAdmin] = useState(false)
     const [activeTab, setActiveTab] = useState('users');
     const [users, setUsers] = useState([]);
+    const [profiles, setProfiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -50,12 +51,31 @@ const Admin = () => {
                 },
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch users.');
-            }
-
             const data = await response.json();
             setUsers(data.users.$values);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchProfiles = async () => {
+        const token = localStorage.getItem('authToken');
+
+        setLoading(true);
+        try {
+            const response = await fetch('http://192.168.101.41:7228/api/Admin/profiles?take=10', {
+                method: 'GET',
+                headers: {
+                    "Content-Type": "*/*",
+                    "Accept": "*/*",
+                    "Authorization": `Bearer ${token}`
+                },
+            });
+
+            const data = await response.json();
+            setProfiles(data.profiles.$values);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -66,6 +86,9 @@ const Admin = () => {
     useEffect(() => {
         if (activeTab === 'users') {
             fetchUsers();
+        }
+        if (activeTab === 'profiles') {
+            fetchProfiles();
         }
     }, [activeTab]);
 
@@ -97,11 +120,9 @@ const Admin = () => {
                     <div>
                         <h2>Users</h2>
 
-                        {/* Отображение состояний загрузки и ошибок */}
                         {loading && <p>Loading users...</p>}
                         {error && <p>Error: {error}</p>}
 
-                        {/* Список пользователей */}
                         {!loading && !error && (
                             <ul>
                                 {users.map(user => (
@@ -119,8 +140,20 @@ const Admin = () => {
                 {activeTab === 'profiles' && (
                     <div>
                         <h2>Profiles</h2>
-                        {/* Здесь добавьте логику отображения списка анкет */}
-                        <p>Here is the profiles management section.</p>
+
+                        {loading && <p>Loading users...</p>}
+                        {error && <p>Error: {error}</p>}
+
+                        {!loading && !error && (
+                            <ul>
+                                {profiles.map(profile => (
+                                    <li key={profile.id}>
+                                        <p><strong>Name:</strong> {profile.name}</p>
+                                        <p><strong>Description:</strong> {profile.description}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 )}
             </div>

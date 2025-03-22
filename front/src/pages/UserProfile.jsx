@@ -2,7 +2,12 @@ import './UserProfile.module.sass'
 
 const UserProfile = () => {
    return (
-      <h1>User</h1>
+       <button onClick={
+          () => {
+          localStorage.removeItem('authToken')
+          window.location.href = '/'
+          }
+       }>Logout</button>
    )
 }
 
