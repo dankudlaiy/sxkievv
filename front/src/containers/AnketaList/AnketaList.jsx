@@ -1,58 +1,74 @@
-import React, {useEffect, useState} from 'react'
-import styles from './AnketaList.module.sass';
-import Anketa from "../Anketa/Anketa"
-import { useSearchParams } from 'react-router-dom';
-
+import React, { useEffect, useState } from "react";
+import styles from "./AnketaList.module.sass";
+import Anketa from "../Anketa/Anketa";
+import { useSearchParams } from "react-router-dom";
 
 const AnketaList = () => {
-   const [profiles, setProfiles] = useState([])
-   const [loading, setLoading] = useState(true)
-   const [error, setError] = useState(null)
+   const [profiles, setProfiles] = useState([]);
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState(null);
    const [searchParams] = useSearchParams();
+   const [hasMore, setHasMore] = useState(true);
+   const [skip, setSkip] = useState(0);
+
+   const fetchProfiles = async () => {
+      setLoading(true);
+      const queryString = searchParams.toString();
+      try {
+         const response = await fetch(
+             `/api/Profile/search?skip=${skip}&take=10&${queryString}`,
+             {
+                method: "GET",
+                headers: {
+                   "Content-Type": "*/*",
+                   Accept: "*/*",
+                },
+             }
+         );
+
+         const data = await response.json();
+
+         setProfiles((prevProfiles) => [...prevProfiles, ...data.profiles]);
+
+         if (profiles.length + data.profiles.length >= data.totalCount) {
+            setHasMore(false);
+         }
+      } catch (err) {
+         setError(err.message);
+      } finally {
+         setLoading(false);
+      }
+   };
 
    useEffect(() => {
-      console.log(searchParams)
-      const fetchProfiles = async () => {
-         const queryString = searchParams.toString();
-         try {
-            const response = await fetch(`/api/Profile/search?take=10&${queryString}`, {
-               method : "GET",
-               headers: {
-                  "Content-Type": "*/*",
-                  "Accept"      : "*/*",
-               },
-            })
+      setProfiles([]);
+      setSkip(0);
+      setHasMore(true);
+   }, [searchParams]);
 
-            if (!response.status >= 300) {
-               setError('Something went wrong')
-               return
-            }
+   useEffect(() => {
+      fetchProfiles();
+   }, [skip]);
 
-            const data = await response.json();
-            if (data.profiles) {
-               setProfiles(data.profiles);
-            } else {
-               setError("Data format is incorrect");
-            }
-         } catch (err) {
-            setError(err.message)
-         } finally {
-            setLoading(false)
-         }
-      }
-
-      fetchProfiles()
-   }, [searchParams])
-
-   if (loading) return <p>Loading...</p>
-   if (error) return <p>Error: {error}</p>
+   if (error) return <p>Error: {error}</p>;
 
    return (
-      <div className={styles.container}>
-         <div className={styles.wrapper}>
-            {profiles.map((profile) => <Anketa key={profile.id} data={profile}/>)}
-         </div>
-      </div>
+       <div className={styles.container}>
+          <div className={styles.wrapper}>
+             {profiles.map((profile) => (
+                 <Anketa key={profile.id} data={profile} />
+             ))}
+             {!loading && hasMore && (
+                 <div className={styles.loadMoreContainer}>
+                    <button className={styles.loadMore} onClick={() => setSkip((prev) => prev + 10)}>
+                       Загрузить ещё
+                    </button>
+                 </div>
+             )}
+             {!hasMore && <p>No more profiles to load</p>}
+          </div>
+          {loading && <p>Loading...</p>}
+       </div>
    );
 };
 
