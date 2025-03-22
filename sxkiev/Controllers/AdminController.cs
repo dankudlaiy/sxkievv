@@ -23,10 +23,10 @@ public class AdminController : ControllerBase
     #region Users
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers([FromQuery] int skip, [FromQuery] int take)
     {
-        var users = await _userService.GetAllUsersAsync();
-        return Ok(users);
+        var users = await _userService.GetAllUsersAsync(skip, take);
+        return Ok(new { Count = users.Item1, Users = users.Item2 });
     }
 
     [HttpGet("users/{id}")]
@@ -51,10 +51,10 @@ public class AdminController : ControllerBase
     #region Profiles
 
     [HttpGet("profiles")]
-    public async Task<IActionResult> GetAllProfiles()
+    public async Task<IActionResult> GetAllProfiles([FromQuery] int skip, [FromQuery] int take)
     {
-        var profiles = await _profileService.GetAllProfilesAsync();
-        return Ok(profiles);
+        var profiles = await _profileService.GetAllProfilesAsync(skip, take);
+        return Ok(new { Count = profiles.Item1, Profiles = profiles.Item2 });
     }
 
     [HttpGet("profiles/{id}")]

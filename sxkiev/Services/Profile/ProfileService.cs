@@ -21,9 +21,20 @@ public class ProfileService : IProfileService
         _adminChatId = long.Parse(serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
     }
 
-    public async Task<IEnumerable<SxKievProfile>> GetAllProfilesAsync()
+    public async Task<(int, IEnumerable<SxKievProfile>)> GetAllProfilesAsync(int skip, int take)
     {
-        return await _profileRepository.GetAllAsync();
+        var query = await _profileRepository.AsQueryable();
+        query = query
+            .OrderByDescending(x => x.Priority)
+            .ThenByDescending(x => x.CreatedAt);
+        
+        var count = await query.CountAsync();
+        
+        query = query.Skip(skip).Take(take);
+        
+        var profiles = await query.ToListAsync();
+        
+        return (count, profiles);
     }
 
     public async Task<IEnumerable<SxKievProfile?>> GetProfilesByUser(long userId, int skip, int take)
@@ -111,7 +122,10 @@ public class ProfileService : IProfileService
                 NightPrice = x.NightPrice,
                 Apartment = x.Apartment,
                 ToClient = x.ToClient,
-                Media = x.Media.Select(m => m.Media).Select(y => y.Path)
+                Photos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("image")).Select(y => y.Path),
+                Videos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("video")).Select(y => y.Path),
+                Districts = x.Districts.Select(y => y.District.ToString()),
+                Favours = x.Favours.Select(y => y.Favour.ToString())
             })
             .ToListAsync();
 

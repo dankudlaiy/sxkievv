@@ -1,4 +1,5 @@
-﻿using sxkiev.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using sxkiev.Data;
 using sxkiev.Repositories.Generic;
 
 namespace sxkiev.Services.User;
@@ -12,9 +13,18 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<IEnumerable<SxKievUser>> GetAllUsersAsync()
+    public async Task<(int, IEnumerable<SxKievUser>)> GetAllUsersAsync(int skip, int take)
     {
-        return await _userRepository.GetAllAsync();
+        var query = await _userRepository.AsQueryable();
+        query = query.OrderByDescending(x => x.IsAdmin).ThenByDescending(x => x.TelegramId);
+
+        var count = await query.CountAsync();
+        
+        query = query.Skip(skip).Take(take);
+        
+        var users = await query.ToListAsync();
+        
+        return (count, users);
     }
 
     public async Task<SxKievUser?> GetUserByIdAsync(long id)

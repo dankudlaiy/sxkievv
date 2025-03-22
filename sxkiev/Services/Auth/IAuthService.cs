@@ -6,4 +6,5 @@ public interface IAuthService
 {
     Task<string> CreateLoginLink(CreateLoginLinkInputModel inputModel);
     Task<CheckLoginLinkResponseModel> CheckLoginLink(string token);
+    Task<string> GetRole(long userId);
 }

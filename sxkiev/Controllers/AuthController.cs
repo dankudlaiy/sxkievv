@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using sxkiev.Models;
 using sxkiev.Services.Auth;
 
@@ -20,5 +22,15 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.CheckLoginLink(botToken);
         return response;
+    }
+
+    [HttpGet("role")]
+    [Authorize]
+    public async Task<IActionResult> GetCurrentUserRole()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) throw new Exception("User not found");
+        var role = await _authService.GetRole(long.Parse(userId));
+        return Ok(new { Role = role });
     }
 }

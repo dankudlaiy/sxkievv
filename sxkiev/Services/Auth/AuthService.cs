@@ -92,4 +92,10 @@ public class AuthService : IAuthService
 
         return response;
     }
+
+    public async Task<string> GetRole(long userId)
+    {
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.TelegramId == userId);
+        return user?.IsAdmin == true ? "admin" : "user";
+    }
 }

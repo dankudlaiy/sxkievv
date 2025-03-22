@@ -4,7 +4,7 @@ namespace sxkiev.Services.User;
 
 public interface IUserService
 {
-    Task<IEnumerable<SxKievUser>> GetAllUsersAsync();
+    Task<(int, IEnumerable<SxKievUser>)> GetAllUsersAsync(int skip, int take);
     Task<SxKievUser?> GetUserByIdAsync(long id);
     Task AddUserAsync(SxKievUser user);
     Task UpdateUserAsync(SxKievUser user);
