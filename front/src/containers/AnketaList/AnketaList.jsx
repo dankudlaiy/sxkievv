@@ -10,11 +10,16 @@ const AnketaList = () => {
    const [searchParams] = useSearchParams();
    const [hasMore, setHasMore] = useState(true);
    const [skip, setSkip] = useState(0);
+   const [loadMore, setLoadMore] = useState(false);
 
    const fetchProfiles = async () => {
       setLoading(true);
       const queryString = searchParams.toString();
       try {
+         if (loadMore) {
+            setSkip((prev) => prev + 10);
+         }
+
          const response = await fetch(
              `/api/Profile/search?skip=${skip}&take=10&${queryString}`,
              {
@@ -30,6 +35,9 @@ const AnketaList = () => {
 
          setProfiles((prevProfiles) => [...prevProfiles, ...data.profiles]);
 
+         setHasMore(true)
+         setLoadMore(false)
+
          if (profiles.length + data.profiles.length >= data.totalCount) {
             setHasMore(false);
          }
@@ -41,14 +49,17 @@ const AnketaList = () => {
    };
 
    useEffect(() => {
-      setProfiles([]);
-      setSkip(0);
-      setHasMore(true);
-   }, [searchParams]);
+      if (loadMore) {
+         fetchProfiles();
+      }
+   }, [loadMore]);
 
    useEffect(() => {
+      setProfiles([]);
+      setSkip(0);
+      setProfiles([])
       fetchProfiles();
-   }, [skip]);
+   }, [searchParams]);
 
    if (error) return <p>Error: {error}</p>;
 
@@ -60,14 +71,13 @@ const AnketaList = () => {
              ))}
              {!loading && hasMore && (
                  <div className={styles.loadMoreContainer}>
-                    <button className={styles.loadMore} onClick={() => setSkip((prev) => prev + 10)}>
+                    <button className={styles.loadMore} onClick={() => setLoadMore(true)}>
                        Загрузить ещё
                     </button>
                  </div>
              )}
-             {!hasMore && <p>No more profiles to load</p>}
+             {loading && <p>Loading...</p>}
           </div>
-          {loading && <p>Loading...</p>}
        </div>
    );
 };
