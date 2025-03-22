@@ -14,7 +14,7 @@ const Select = ({title, options, value, changeState, ...props}) => {
 
    return (
      <select className={styles.container} onChange={onChange} value={value} {...props}>
-        <option value>{title}</option>
+        <option value={""}>{title}</option>
 
         {options.map(el => (
            <option key={el} name={el} value={el}>{capitalizeFirstLetter(el)}</option>

@@ -79,10 +79,16 @@ const Header = () => {
                              Войти
                          </Button>
                  }
-                 <Button onClick={() => {window.location.href = '/add-anketa'}}>
-                     <FontAwesomeIcon icon={faPlus}/>
-                     Анкета
-                 </Button>
+                 {
+                     isAuth ?
+                         <Button
+                             style={{fontWeight: '600'}}
+                             onClick={() => {window.location.href = '/add-anketa'}}>
+                             <FontAwesomeIcon icon={faPlus}/>
+                             Анкета
+                         </Button>
+                         : null
+                 }
              </div>
          </div>
 

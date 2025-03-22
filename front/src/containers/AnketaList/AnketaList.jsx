@@ -1,17 +1,21 @@
 import React, {useEffect, useState} from 'react'
 import styles from './AnketaList.module.sass';
 import Anketa from "../Anketa/Anketa"
+import { useSearchParams } from 'react-router-dom';
 
 
 const AnketaList = () => {
    const [profiles, setProfiles] = useState([])
    const [loading, setLoading] = useState(true)
    const [error, setError] = useState(null)
+   const [searchParams] = useSearchParams();
 
    useEffect(() => {
+      console.log(searchParams)
       const fetchProfiles = async () => {
+         const queryString = searchParams.toString();
          try {
-            const response = await fetch("/api/Profile/search?take=10", {
+            const response = await fetch(`/api/Profile/search?take=10&${queryString}`, {
                method : "GET",
                headers: {
                   "Content-Type": "*/*",
@@ -38,7 +42,7 @@ const AnketaList = () => {
       }
 
       fetchProfiles()
-   }, [])
+   }, [searchParams])
 
    if (loading) return <p>Loading...</p>
    if (error) return <p>Error: {error}</p>

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styles from './Filter.module.sass';
 import Select from "../Select/Select"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faMagnifyingGlass, faUser} from "@fortawesome/free-solid-svg-icons"
 import Button from "../Button/Button"
-
+import { useNavigate } from 'react-router-dom';
 
 const price_options = [
    "Меньше чем 500грн",
@@ -195,25 +195,64 @@ const services_options = [
    "Трамплинг"
 ];
 
-
-
 const Filter = () => {
-   return (
-      <div className={styles.container}>
-         <Select title="Цена за час" options={price_options}/>
-         <Select title="Возраст" options={age_options}/>
-         <Select title="Вес" options={weight_options}/>
-         <Select title="Рост" options={height_options}/>
-         <Select title="Размер груди" options={bust_size_options}/>
-         <Select title="Принимает" options={accepts_options}/>
-         <Select title="Райно и Метро" options={district_metro_options}/>
-         <Select title="Услуги" options={services_options}/>
+   const navigate = useNavigate();
 
-         <Button style={{fontWeight: '600'}}>
-            <FontAwesomeIcon icon={faMagnifyingGlass} />
-            Поиск
-         </Button>
-      </div>
+   const [price, setPrice] = useState('');
+   const [age, setAge] = useState('');
+   const [weight, setWeight] = useState('');
+   const [height, setHeight] = useState('');
+   const [bustSize, setBustSize] = useState('');
+   const [accepts, setAccepts] = useState('');
+   const [districtMetro, setDistrictMetro] = useState('');
+   const [services, setServices] = useState('');
+
+   const handleSearch = () => {
+      const queryParamsObject = {
+         minPrice: price ? price.split('-')[0] : undefined,
+         maxPrice: price ? price.split('-')[1] : undefined,
+         minAge: age ? age.split('-')[0] : undefined,
+         maxAge: age ? age.split('-')[1] : undefined,
+         minWeight: weight ? weight.split('-')[0] : undefined,
+         maxWeight: weight ? weight.split('-')[1] : undefined,
+         minHeight: height ? height.split('-')[0] : undefined,
+         maxHeight: height ? height.split('-')[1] : undefined,
+         breastSize: bustSize || undefined,
+         apartment: accepts === 'Апартаменты' ? true : undefined,
+         toClient: accepts === 'Клиент' ? true : undefined,
+         district: districtMetro || undefined,
+         favour: services || undefined,
+         skip: 0,
+         take: 10,
+      };
+
+      const queryParams = new URLSearchParams();
+
+      Object.keys(queryParamsObject).forEach((key) => {
+         if (queryParamsObject[key] !== undefined) {
+            queryParams.append(key, queryParamsObject[key]);
+         }
+      });
+
+      navigate(`/?${queryParams.toString()}`);
+   };
+
+   return (
+       <div className={styles.container}>
+          <Select title="Цена за час" options={price_options} value={price} changeState={setPrice} />
+          <Select title="Возраст" options={age_options} value={age} changeState={setAge} />
+          <Select title="Вес" options={weight_options} value={weight} changeState={setWeight} />
+          <Select title="Рост" options={height_options} value={height} changeState={setHeight} />
+          <Select title="Размер груди" options={bust_size_options} value={bustSize} changeState={setBustSize} />
+          <Select title="Принимает" options={accepts_options} value={accepts} changeState={setAccepts} />
+          <Select title="Район и Метро" options={district_metro_options} value={districtMetro} changeState={setDistrictMetro} />
+          <Select title="Услуги" options={services_options} value={services} changeState={setServices} />
+
+          <Button style={{ fontWeight: '600' }} onClick={handleSearch}>
+             <FontAwesomeIcon icon={faMagnifyingGlass} />
+             Поиск
+          </Button>
+       </div>
    );
 };
 
