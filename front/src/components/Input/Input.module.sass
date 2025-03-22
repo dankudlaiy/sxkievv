@@ -1,0 +1,26 @@
+.container
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 20px
+  width: 100%
+
+  label
+    width: 15%
+    font-size: 1rem
+
+
+  input, textarea, select
+    width: 85%
+    font-size: 1rem
+    border: 1px solid #ccc
+    padding: 10px 15px
+    border-radius: 8px
+    outline: none
+
+.required::after
+  content: '*'
+  color: red
+  position: relative
+  display: inline-block
+  margin-left: 5px

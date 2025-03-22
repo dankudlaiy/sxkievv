@@ -1,5 +1,5 @@
 import styles from './Header.module.sass'
-import Button from "../components/Button"
+import Button from "../../components/Button/Button"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faPlus, faUser} from "@fortawesome/free-solid-svg-icons"
 import {useEffect, useState} from "react";
@@ -13,7 +13,7 @@ const Header = () => {
         if (token) {
             setIsAuth(true)
 
-            fetch(`http://192.168.101.41:7228/api/Auth/role`, {
+            fetch(`/api/Auth/role`, {
                 method : "GET",
                 headers: {
                     "Content-Type": "*/*",
@@ -38,7 +38,7 @@ const Header = () => {
    return (
       <header className={styles.container}>
          <div className={styles.wrapper}>
-             <a href="http://localhost:3000/">
+             <a href="/">
                  <img src="/images/icon.png" alt="Clickable Icon" />
              </a>
 
@@ -49,7 +49,7 @@ const Header = () => {
                          <Button
                              style={{fontWeight: '600'}}
                              onClick={() => {
-                                 window.location.href = 'http://localhost:3000/admin'
+                                 window.location.href = '/admin'
                              }}
                          >
                              <FontAwesomeIcon icon={faUser}/>
@@ -62,7 +62,7 @@ const Header = () => {
                          <Button
                              style={{fontWeight: '600'}}
                              onClick={() => {
-                                 window.location.href = 'http://localhost:3000/profile'
+                                 window.location.href = '/profile'
                              }}
                          >
                              <FontAwesomeIcon icon={faUser}/>
@@ -79,7 +79,7 @@ const Header = () => {
                              Войти
                          </Button>
                  }
-                 <Button>
+                 <Button onClick={() => {window.location.href = '/add-anketa'}}>
                      <FontAwesomeIcon icon={faPlus}/>
                      Анкета
                  </Button>

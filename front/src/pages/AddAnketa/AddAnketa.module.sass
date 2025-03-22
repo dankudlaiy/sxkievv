@@ -1,0 +1,46 @@
+.container
+  background: white
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  width: 100%
+  max-width: 100vw
+  padding: 50px 30px 0
+
+.wrapper
+  width: 100%
+  max-width: 1200px
+  display: flex
+  justify-content: center
+  align-items: center
+  flex-direction: column
+
+  h1
+    text-align: left
+
+
+.form
+  margin: 50px 0 0
+  width: 100%
+  max-width: 750px
+  display: flex
+  justify-content: center
+  align-items: center
+  flex-direction: column
+  gap: 15px
+
+.input_row
+  display: flex
+  flex-direction: row
+  gap: 15px
+  width: 100%
+
+  & > *
+    width: calc(45% - 15px)
+
+  input, select, textarea
+    width: 75% !important
+
+  label
+    width: 25% !important

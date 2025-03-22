@@ -15,7 +15,7 @@ const Admin = () => {
         if (token) {
             setIsAuth(true)
 
-            fetch(`http://192.168.101.41:7228/api/Auth/role`, {
+            fetch(`/api/Auth/role`, {
                 method : "GET",
                 headers: {
                     "Content-Type": "*/*",
@@ -42,7 +42,7 @@ const Admin = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.101.41:7228/api/Admin/users?take=10', {
+            const response = await fetch('/api/Admin/users?take=10', {
                 method: 'GET',
                 headers: {
                     "Content-Type": "*/*",
@@ -52,7 +52,7 @@ const Admin = () => {
             });
 
             const data = await response.json();
-            setUsers(data.users.$values);
+            setUsers(data.users);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -65,7 +65,7 @@ const Admin = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.101.41:7228/api/Admin/profiles?take=10', {
+            const response = await fetch('/api/Admin/profiles?take=10', {
                 method: 'GET',
                 headers: {
                     "Content-Type": "*/*",
@@ -75,7 +75,7 @@ const Admin = () => {
             });
 
             const data = await response.json();
-            setProfiles(data.profiles.$values);
+            setProfiles(data.profiles);
         } catch (err) {
             setError(err.message);
         } finally {

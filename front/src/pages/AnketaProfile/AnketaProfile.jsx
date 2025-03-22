@@ -1,9 +1,9 @@
 import {useEffect, useState} from "react"
-import styles from "./Home.module.sass"
+import styles from "../Home/Home.module.sass"
 import {useParams} from "react-router-dom";
 
 
-const GirlProfile = () => {
+const AnketaProfile = () => {
     const { id } = useParams();
     const [profile, setProfile] = useState([])
     const [loading, setLoading] = useState(true)
@@ -12,7 +12,7 @@ const GirlProfile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await fetch(`http://192.168.101.41:7228/api/Profile/${id}`, {
+                const response = await fetch(`/api/Profile/${id}`, {
                     method : "GET",
                     headers: {
                         "Content-Type": "*/*",
@@ -39,7 +39,7 @@ const GirlProfile = () => {
         }
 
         fetchProfile()
-    }, [])
+    }, [id])
 
     if (loading) return <p>Loading...</p>
     if (error) return <p>Error: {error}</p>
@@ -53,7 +53,7 @@ const GirlProfile = () => {
                     <h3>{profile.name}</ h3>
                     <p>{profile.age} years old</p>
                     <button onClick={() => {
-                        window.location.href = 'http://localhost:3000'
+                        window.history.back();
                     }}>Go back</button>
                 </div>
             </div>
@@ -61,4 +61,4 @@ const GirlProfile = () => {
     )
 }
 
-export default GirlProfile
+export default AnketaProfile

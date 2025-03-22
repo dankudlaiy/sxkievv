@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react"
-import styles from "./Home.module.sass"
+import styles from "./Home/Home.module.sass"
 
 
 const Auth = () => {
@@ -16,7 +16,7 @@ const Auth = () => {
 
                 const token = urlParams.get('token');
 
-                const response = await fetch(`http://192.168.101.41:7228/api/Auth?botToken=${token}`, {
+                const response = await fetch(`/api/Auth?botToken=${token}`, {
                     method : "GET",
                     headers: {
                         "Content-Type": "*/*",
