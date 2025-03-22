@@ -10,7 +10,7 @@ public class ProfileResponseModel
     public int Breast { get; set; }
     public int Weight { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public int Priority { get; set; }
+    public ProfileType Type { get; set; }
     public double HourPrice { get; set; }
     public double TwoHourPrice { get; set; }
     public double NightPrice { get; set; }

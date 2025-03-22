@@ -14,12 +14,10 @@ namespace sxkiev.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
-    private readonly IMediaService _mediaService;
 
-    public ProfileController(IProfileService profileService, IMediaService mediaService)
+    public ProfileController(IProfileService profileService)
     {
         _profileService = profileService;
-        _mediaService = mediaService;
     }
 
     [HttpGet]
@@ -41,7 +39,7 @@ public class ProfileController : ControllerBase
         [FromQuery] int? minWeight, [FromQuery] int? maxWeight,
         [FromQuery] int? minHeight, [FromQuery] int? maxHeight,
         [FromQuery] int? breastSize, [FromQuery] bool? apartment, [FromQuery] bool? toClient,
-        [FromQuery] District? district, [FromQuery] Favour? favour,
+        [FromQuery] string? district, [FromQuery] string? favour,
         [FromQuery] int skip, [FromQuery] int take
         )
     {
@@ -81,12 +79,6 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
-    [HttpGet("priority")]
-    public async Task<IActionResult> GetOrderByPriority([FromQuery] int priority)
-    {
-        return Ok(await _profileService.GetOrderByPriority(priority));
-    }
-
     [HttpPost]
     public async Task<IActionResult> AddProfile([FromBody] AddProfileInputModel profileInputModel)
     {
@@ -106,20 +98,52 @@ public class ProfileController : ControllerBase
             TwoHourPrice = profileInputModel.TwoHourPrice,
             NightPrice = profileInputModel.NightPrice,
             Apartment = profileInputModel.Apartment,
-            ToClient = profileInputModel.ToClient
+            ToClient = profileInputModel.ToClient,
+            Type = profileInputModel.Type,
+            Media = new List<ProfileMedia>(),
+            Districts = new List<ProfileDistrict>(),
+            Favours = new List<ProfileFavour>()
         };
-
-        await _profileService.AddProfileAsync(profile);
 
         if (profileInputModel.Media is { Length: > 0 })
         {
             foreach (var media in profileInputModel.Media)
             {
-                await _mediaService.AddMediaToProfileAsync(profile.Id, media);
+                profile.Media.Add(new ProfileMedia
+                {
+                    ProfileId = profile.Id,
+                    MediaId = media
+                });
             }
         }
 
-        return CreatedAtAction(nameof(GetProfileById), new { id = profile.Id }, profile);
+        if (profileInputModel.Districts is { Length: > 0 })
+        {
+            foreach (var district in profileInputModel.Districts)
+            {
+                profile.Districts.Add(new ProfileDistrict
+                {
+                    ProfileId = profile.Id,
+                    District = district
+                });
+            }
+        }
+
+        if (profileInputModel.Favours is { Length: > 0 })
+        {
+            foreach (var favour in profileInputModel.Favours)
+            {
+                profile.Favours.Add(new ProfileFavour
+                {
+                    ProfileId = profile.Id,
+                    Favour = favour
+                });
+            }
+        }
+
+        await _profileService.AddProfileAsync(profile);
+
+        return Ok();
     }
 
     [HttpPut]

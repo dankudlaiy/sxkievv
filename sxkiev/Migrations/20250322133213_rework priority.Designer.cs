@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using sxkiev.Data;
@@ -11,9 +12,11 @@ using sxkiev.Data;
 namespace sxkiev.Migrations
 {
     [DbContext(typeof(SxKievDbContext))]
-    partial class SxKievDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250322133213_rework priority")]
+    partial class reworkpriority
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,9 +125,8 @@ namespace sxkiev.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("District")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("District")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("uuid");
@@ -144,9 +146,8 @@ namespace sxkiev.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Favour")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Favour")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("ProfileId")
                         .HasColumnType("uuid");
