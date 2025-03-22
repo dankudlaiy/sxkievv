@@ -221,9 +221,7 @@ const Filter = () => {
          apartment: accepts === 'Апартаменты' ? true : undefined,
          toClient: accepts === 'Клиент' ? true : undefined,
          district: districtMetro || undefined,
-         favour: services || undefined,
-         skip: 0,
-         take: 10,
+         favour: services || undefined
       };
 
       const queryParams = new URLSearchParams();
