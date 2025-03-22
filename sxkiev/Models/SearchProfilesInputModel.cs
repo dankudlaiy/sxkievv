@@ -15,6 +15,6 @@ public class SearchProfilesInputModel
     public int? BreastSize { get; set; }
     public bool? Apartment { get; set; }
     public bool? ToClient { get; set; }
-    public District? District { get; set; }
-    public Favour? Favour { get; set; }
+    public string? District { get; set; }
+    public string? Favour { get; set; }
 }

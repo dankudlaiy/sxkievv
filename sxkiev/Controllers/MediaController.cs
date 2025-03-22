@@ -23,9 +23,9 @@ public class MediaController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null) throw new Exception("User not found");
-
+    
         var result = await _mediaService.UploadMediaAsync(files, long.Parse(userId));
-
+    
         return result;
     }
 }

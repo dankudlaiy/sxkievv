@@ -17,5 +17,8 @@ public class AddProfileInputModel
     public double NightPrice { get; set; }
     public bool Apartment { get; set; }
     public bool ToClient { get; set; }
+    public ProfileType Type { get; set; }
     public int[]? Media { get; set; }
+    public string[]? Districts { get; set; }
+    public string[]? Favours { get; set; }
 }

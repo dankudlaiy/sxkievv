@@ -6,8 +6,7 @@ namespace sxkiev.Services.Profile;
 public interface IProfileService
 {
     Task<(int, IEnumerable<SxKievProfile>)> GetAllProfilesAsync(int skip, int take);
-    Task<IEnumerable<SxKievProfile?>> GetProfilesByUser(long userId, int skip, int take);
-    Task<int> GetOrderByPriority(int priority);
+    Task<IEnumerable<ProfileResponseModel?>> GetProfilesByUser(long userId, int skip, int take);
     Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input);
     Task<SxKievProfile?> GetProfileAsync(Guid id);
     Task UpdateProfileAsync(SxKievProfile profile);

@@ -2,7 +2,9 @@
 using sxkiev.Data;
 using sxkiev.Models;
 using sxkiev.Repositories.Generic;
+using sxkiev.Services.Media;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace sxkiev.Services.Profile;
 
@@ -11,12 +13,18 @@ public class ProfileService : IProfileService
     private readonly IRepository<SxKievUser> _userRepository;
     private readonly IRepository<SxKievProfile> _profileRepository;
     private readonly TelegramBotClient _botClient;
+    private readonly IMediaService _mediaService;
     private readonly long _adminChatId;
+    private readonly string _rootPath;
 
-    public ProfileService(IRepository<SxKievProfile> profileRepository, IConfiguration configuration, IServiceProvider serviceProvider, IRepository<SxKievUser> userRepository)
+    public ProfileService(IRepository<SxKievProfile> profileRepository, IConfiguration configuration, 
+        IServiceProvider serviceProvider, IRepository<SxKievUser> userRepository, 
+        IMediaService mediaService, IWebHostEnvironment webHostEnvironment)
     {
         _profileRepository = profileRepository;
         _userRepository = userRepository;
+        _mediaService = mediaService;
+        _rootPath = webHostEnvironment.WebRootPath;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
         _adminChatId = long.Parse(serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
     }
@@ -25,7 +33,7 @@ public class ProfileService : IProfileService
     {
         var query = await _profileRepository.AsQueryable();
         query = query
-            .OrderByDescending(x => x.Priority)
+            .OrderByDescending(x => x.Type)
             .ThenByDescending(x => x.CreatedAt);
         
         var count = await query.CountAsync();
@@ -37,19 +45,35 @@ public class ProfileService : IProfileService
         return (count, profiles);
     }
 
-    public async Task<IEnumerable<SxKievProfile?>> GetProfilesByUser(long userId, int skip, int take)
+    public async Task<IEnumerable<ProfileResponseModel?>> GetProfilesByUser(long userId, int skip, int take)
     {
         return await _profileRepository
             .Query(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAt)
             .Skip(skip)
             .Take(take)
+            .Select(x => new ProfileResponseModel
+            {
+                Age = x.Age,
+                Breast = x.Breast,
+                CreatedAt = x.CreatedAt,
+                Description = x.Description,
+                Height = x.Height,
+                Id = x.Id,
+                Name = x.Name,
+                Type = x.Type,
+                Weight = x.Weight,
+                HourPrice = x.HourPrice,
+                TwoHourPrice = x.TwoHourPrice,
+                NightPrice = x.NightPrice,
+                Apartment = x.Apartment,
+                ToClient = x.ToClient,
+                Photos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("image")).Select(y => y.Path),
+                Videos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("video")).Select(y => y.Path),
+                Districts = x.Districts.Select(y => y.District.ToString()),
+                Favours = x.Favours.Select(y => y.Favour.ToString())
+            })
             .ToListAsync();
-    }
-
-    public async Task<int> GetOrderByPriority(int priority)
-    {
-        return await _profileRepository.Query(x => x.Priority > priority).CountAsync();
     }
 
     public async Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input)
@@ -89,16 +113,16 @@ public class ProfileService : IProfileService
 
         if (input.District is not null)
         {
-            query = query.Where(x => x.Districts.Select(y => y.District).Contains(input.District.Value));
+            query = query.Where(x => x.Districts.Select(y => y.District).Contains(input.District));
         }
 
         if (input.Favour is not null)
         {
-            query = query.Where(x => x.Favours.Select(y => y.Favour).Contains(input.Favour.Value));
+            query = query.Where(x => x.Favours.Select(y => y.Favour).Contains(input.Favour));
         }
 
         query = query
-            .OrderByDescending(x => x.Priority)
+            .OrderByDescending(x => x.Type)
             .ThenByDescending(x => x.CreatedAt);
 
         var count = await query.CountAsync();
@@ -115,7 +139,7 @@ public class ProfileService : IProfileService
                 Height = x.Height,
                 Id = x.Id,
                 Name = x.Name,
-                Priority = x.Priority,
+                Type = x.Type,
                 Weight = x.Weight,
                 HourPrice = x.HourPrice,
                 TwoHourPrice = x.TwoHourPrice,
@@ -154,9 +178,17 @@ public class ProfileService : IProfileService
         
         if (user is null) throw new Exception("User not found");
 
-        if (user.Balance < PricePolicy.Profile) throw new Exception("Not enough balance");
+        var price = profile.Type switch
+        {
+            ProfileType.Vip => PricePolicy.Vip,
+            ProfileType.Gold => PricePolicy.Gold,
+            ProfileType.Platinum => PricePolicy.Platinum,
+            _ => PricePolicy.Basic
+        };
 
-        user.Balance -= PricePolicy.Profile;
+        if (user.Balance < price) throw new Exception("Not enough balance");
+
+        user.Balance -= price;
 
         var createdProfile = await _profileRepository.AddAsync(profile);
 
@@ -171,7 +203,27 @@ public class ProfileService : IProfileService
             ]
         ]);
 
-        await _botClient.SendMessage(chatId:_adminChatId, text: $"Новая анкета: {profile.Name}", replyMarkup: adminKeyboard);
+        Data.Media? firstPhoto = null;
+        foreach (var media in profile.Media)
+        {
+            var upload = await _mediaService.GetMediaByIdAsync(media.MediaId);
+            if (upload.Type.Contains("image") && firstPhoto is null)
+            {
+                firstPhoto = upload;
+            }
+        }
+
+        if (firstPhoto is null)
+        {
+            throw new ArgumentException("Profile must have at least one photo");
+        }
+
+        var relativePath = firstPhoto.Path.TrimStart('/');
+        relativePath = relativePath.Replace('/', '\\');
+        var filePath = Path.Combine(_rootPath, relativePath);
+        await using var stream = File.OpenRead(filePath);
+        await _botClient.SendPhoto(chatId:_adminChatId, photo: new InputFileStream(stream),
+            caption: $"Новая анкета: {profile.Name}\nhttp://localhost:3000/{profile.Id}", replyMarkup: adminKeyboard);
 
         return createdProfile;
     }

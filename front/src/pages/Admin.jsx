@@ -52,7 +52,7 @@ const Admin = () => {
             });
 
             const data = await response.json();
-            setUsers(data.users.$values);
+            setUsers(data.users);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -75,7 +75,7 @@ const Admin = () => {
             });
 
             const data = await response.json();
-            setProfiles(data.profiles.$values);
+            setProfiles(data.profiles);
         } catch (err) {
             setError(err.message);
         } finally {

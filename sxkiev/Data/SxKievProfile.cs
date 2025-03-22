@@ -20,7 +20,7 @@ public class SxKievProfile
     public bool IsActive { get; set; }
     public bool IsRejected { get; set; }
     public bool IsBanned { get; set; }
-    public int Priority { get; set; }
+    public ProfileType Type { get; set; }
     public double HourPrice { get; set; }
     public double TwoHourPrice { get; set; }
     public double NightPrice { get; set; }

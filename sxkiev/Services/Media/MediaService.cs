@@ -1,5 +1,8 @@
 ﻿using sxkiev.Data;
 using sxkiev.Repositories.Generic;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace sxkiev.Services.Media;
 
@@ -30,7 +33,8 @@ public class MediaService : IMediaService
                 throw new ArgumentException("File is either null or empty");
             }
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            var wwwrootFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var uploadsFolder = Path.Combine(wwwrootFolder, "uploads");
 
             if (!Directory.Exists(uploadsFolder))
             {
@@ -43,6 +47,29 @@ public class MediaService : IMediaService
             await using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream);
+            }
+
+            using (var image = await Image.LoadAsync(filePath))
+            {
+                using var watermark = await Image.LoadAsync(Path.Combine(wwwrootFolder, "watermark.png"));
+
+                var location = new Point(
+                    (image.Width - watermark.Width) / 2,
+                    (int)Math.Round((image.Height - watermark.Height) / 1.15f)
+                );
+
+                image.Mutate(ctx =>
+                    ctx.DrawImage(
+                        watermark,
+                        location,
+                        new GraphicsOptions
+                        {
+                            ColorBlendingMode = PixelColorBlendingMode.Normal
+                        }
+                    )
+                );
+
+                await image.SaveAsync(filePath);
             }
 
             var media = new Data.Media
@@ -69,5 +96,14 @@ public class MediaService : IMediaService
         };
 
         await _profileMediaRepository.AddAsync(profileMedia);
+    }
+
+    public async Task<Data.Media> GetMediaByIdAsync(int id)
+    {
+        var media = await _mediaRepository.FirstOrDefaultAsync(x => x.Id == id);
+        
+        if (media == null) throw new Exception("Media not found");
+        
+        return media;
     }
 }
