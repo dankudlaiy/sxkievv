@@ -1,5 +1,5 @@
 import styles from './Header.module.sass'
-import Button from "./Button"
+import Button from "../components/Button"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faPlus, faUser} from "@fortawesome/free-solid-svg-icons"
 

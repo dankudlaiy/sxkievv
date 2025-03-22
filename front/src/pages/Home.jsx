@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react"
 import styles from "./Home.module.sass"
 import Filter from "../components/Filter"
+import AnketaList from "../containers/AnketaList"
 
 
 const Home = () => {
@@ -43,6 +44,8 @@ const Home = () => {
       <div className={styles.container}>
          <div className={styles.profile_list}>
             <Filter/>
+
+            <AnketaList/>
          </div>
       </div>
    )
