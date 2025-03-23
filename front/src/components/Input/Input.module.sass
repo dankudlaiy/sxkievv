@@ -1,22 +1,29 @@
 .container
   display: flex
   flex-direction: row
-  align-items: center
+  align-items: flex-start
   gap: 20px
   width: 100%
+  position: relative
 
   label
     width: 15%
     font-size: 1rem
+    margin-top: 5px
 
+
+  &>div:nth-child(2)
+    width: 50%
 
   input, textarea, select
     width: 85%
     font-size: 1rem
-    border: 1px solid #ccc
     padding: 10px 15px
     border-radius: 8px
     outline: none
+
+  .input, textarea, select
+    border: 1px solid #ccc
 
 .required::after
   content: '*'
@@ -24,3 +31,45 @@
   position: relative
   display: inline-block
   margin-left: 5px
+
+.radio_table
+  border-collapse: collapse
+  margin-top: 0
+  width: 100%
+
+  tbody
+    width: 100%
+
+.radio_btn
+  width: 100%
+  height: 40px
+  display: flex
+  align-items: center
+  justify-content: center
+  border: 1px solid #ccc
+  border-radius: 4px
+  cursor: pointer
+  user-select: none
+
+  &.selected
+    background-color: rgba(95, 26, 95, 0.3)
+
+.radio_container
+  padding: 16px 5px
+  &:nth-child(2), &:nth-child(1)
+    padding-top: 0 !important
+
+
+.errorMessage
+  color: #d51f1f
+  font-size: 14px
+  position: absolute
+  left: 50%
+  transform: translateX(-50%)
+  text-align: center
+  bottom: 0
+
+.invalid
+  border: 2px solid #c22b2b !important
+  position: relative
+  margin-bottom: 40px

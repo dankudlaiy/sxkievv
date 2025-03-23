@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './Anketa.module.sass';
+import styles from './AdminAnketa.module.sass';
 import clsx from 'clsx';
 import Button from '../../components/Button/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faVenus, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import {faVenus, faChevronLeft, faChevronRight, faPen, faTurnUp, faClock, faBullhorn, faEyeSlash} from '@fortawesome/free-solid-svg-icons'
 import {useNavigate} from "react-router-dom"
+import Hr from "../../components/Hr"
 
-const Anketa = ({ data }) => {
+
+const AdminAnketa = ({ data }) => {
    const navigate = useNavigate()
 
    const [isMobile, setIsMobile] = useState(false);
@@ -54,8 +56,7 @@ const Anketa = ({ data }) => {
    }, [isMobile, photos.length]);
 
    // ─────────────────────────────────────────────────────────────
-   // 3) Manual navigation
-   // Reset the timer after each manual action
+   // 3) SLIDER
    // ─────────────────────────────────────────────────────────────
    const prevSlide = () => {
       setSlideIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
@@ -67,9 +68,6 @@ const Anketa = ({ data }) => {
       startAutoSlideTimer();
    };
 
-   // ─────────────────────────────────────────────────────────────
-   // 4) Invisible overlays for left & right clicks
-   // ─────────────────────────────────────────────────────────────
    const handleLeftClick = () => {
       if (photos.length > 1) prevSlide();
    };
@@ -77,9 +75,6 @@ const Anketa = ({ data }) => {
       if (photos.length > 1) nextSlide();
    };
 
-   // ─────────────────────────────────────────────────────────────
-   // 5) Swipe detection (touch events)
-   // ─────────────────────────────────────────────────────────────
    const touchStartX = useRef(null);
 
    const onTouchStart = (e) => {
@@ -114,7 +109,7 @@ const Anketa = ({ data }) => {
          <div className={styles.wrapper}>
             {/* Top Section */}
             <div className={styles.top}>
-               <div className={styles.name} onClick={openAnketa}>
+               <div className={styles.name}>
                   <FontAwesomeIcon icon={faVenus} />
                   {data.name}
                </div>
@@ -212,8 +207,61 @@ const Anketa = ({ data }) => {
 
                   {isMobile && <div className={styles.description}>{data.description}</div>}
 
-                  <Button type="submit" onClick={openAnketa}>
-                     ПОЛНАЯ АНКЕТА
+                  <Button type="submit-noshine" onClick={openAnketa}>
+                     Посмотреть анкету
+                  </Button>
+               </div>
+            </div>
+
+            <div className={styles.bottom}>
+               <h2>Анкета видна на сайте</h2>
+
+               <Hr/>
+
+               <div className={styles.admin_data}>
+                  <div className={styles.admin_data_row}>
+                     <div className={styles.admin_data_title}>Пакет</div>
+                     <div className={styles.admin_data_val}>Вип</div>
+                  </div>
+
+                  <div className={styles.admin_data_row}>
+                     <div className={styles.admin_data_title}>Осталось дней</div>
+                     <div className={styles.admin_data_val}>21</div>
+                  </div>
+
+                  <div className={styles.admin_data_row}>
+                     <div className={styles.admin_data_title}>Просмотры</div>
+                     <div className={styles.admin_data_val}>6234</div>
+                  </div>
+
+                  <div className={styles.admin_data_row}>
+                     <div className={styles.admin_data_title}>Нажатий на телефон</div>
+                     <div className={styles.admin_data_val}>150</div>
+                  </div>
+               </div>
+
+               <Hr/>
+
+               <div className={styles.admin_btns}>
+                  <Button style={{background: 'gray'}}>
+                     <FontAwesomeIcon icon={faEyeSlash} />
+                     Скрыть
+                  </Button>
+                  <Button>
+                     <FontAwesomeIcon icon={faTurnUp} />
+                     Сменить тариф
+                  </Button>
+                  <Button>
+                     <FontAwesomeIcon icon={faClock} />
+                     Продлить анкету
+                  </Button>
+                  <Button>
+                     <FontAwesomeIcon icon={faBullhorn} />
+                     Продвигать
+                  </Button>
+                  <Button>
+                     <FontAwesomeIcon icon={faPen} />
+                     Редактировать
                   </Button>
                </div>
             </div>
@@ -222,4 +270,4 @@ const Anketa = ({ data }) => {
    );
 };
 
-export default Anketa;
+export default AdminAnketa;

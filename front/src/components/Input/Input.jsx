@@ -1,8 +1,7 @@
-// src/components/Input/Input.jsx
-
-import React, { useRef } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import styles from './Input.module.sass';
+import React, {useEffect, useRef, useState} from 'react'
+import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
+import styles from './Input.module.sass'
+import clsx from "clsx"
 
 const Input = ({
                   placeholder = '',
@@ -11,58 +10,73 @@ const Input = ({
                   required = false,
                   title,
                   changeState,
+                  name = '',
                   ...props
                }) => {
+
    // We use one ref for files in different modes
-   const fileInputRef = useRef(null);
+   const fileInputRef = useRef(null)
+
+   const onChange = (e) => {
+      e.preventDefault()
+      changeState(e.target.value)
+   }
+
+   const error_el = props.error && <p className={styles.errorMessage}>{props.error}</p>
+   const title_el = (
+      <label className={required ? styles.required : ''}>
+         {title}
+      </label>
+   )
+
+   const input_class = clsx(styles.input, {[styles.invalid]: props.error})
+
 
    // ─────────────────────────────────────────────────────────────────
    // 1) VIDEO MODE (single video)
    // ─────────────────────────────────────────────────────────────────
    if (type === 'video') {
       // For video, value is a single File or null
-      const videoFile = value instanceof File ? value : null;
+      const videoFile = value instanceof File ? value : null
 
       const handleClick = () => {
          if (fileInputRef.current) {
-            fileInputRef.current.click();
+            fileInputRef.current.click()
          }
-      };
+      }
 
       const onFileChange = (e) => {
-         const selectedFiles = e.target.files;
+         const selectedFiles = e.target.files
          if (selectedFiles && selectedFiles[0]) {
-            const file = selectedFiles[0];
+            const file = selectedFiles[0]
             // Accept only videos
             if (file.type.startsWith('video/')) {
-               changeState(file);
+               changeState(file)
             }
          }
-         e.target.value = null; // reset so user can select the same file again if desired
-      };
+         e.target.value = null // reset so user can select the same file again if desired
+      }
 
       return (
          <div className={styles.container}>
-            <label className={required ? styles.required : ''}>
-               {title}
-            </label>
+            {title_el}
 
             {/* Clickable box for selecting a single video */}
             <div
                className={styles.dragArea}
                onClick={handleClick}
                style={{
-                  border: '2px dashed #ccc',
+                  border      : '2px dashed #ccc',
                   borderRadius: '8px',
-                  padding: '20px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
+                  padding     : '20px',
+                  textAlign   : 'center',
+                  cursor      : 'pointer',
                }}
             >
                {videoFile ? (
                   <>
                      <p>{videoFile.name}</p>
-                     <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
+                     <p style={{fontStyle: 'italic', marginTop: '5px'}}>
                         Нажмите, чтобы выбрать другое видео
                      </p>
                   </>
@@ -73,14 +87,18 @@ const Input = ({
 
             {/* Hidden file input */}
             <input
+               className={input_class}
                ref={fileInputRef}
                type="file"
                accept="video/*"
                onChange={onFileChange}
-               style={{ display: 'none' }}
+               style={{display: 'none'}}
+               name={name}
             />
+
+            {error_el}
          </div>
-      );
+      )
    }
 
    // ─────────────────────────────────────────────────────────────────
@@ -88,73 +106,71 @@ const Input = ({
    // ─────────────────────────────────────────────────────────────────
    if (type === 'photos') {
       // We expect value to be an array of Files for photos
-      const photos = Array.isArray(value) ? value : [];
+      const photos = Array.isArray(value) ? value : []
 
       // reorder helper
       const reorder = (list, startIndex, endIndex) => {
-         const result = Array.from(list);
-         const [removed] = result.splice(startIndex, 1);
-         result.splice(endIndex, 0, removed);
-         return result;
-      };
+         const result = Array.from(list)
+         const [removed] = result.splice(startIndex, 1)
+         result.splice(endIndex, 0, removed)
+         return result
+      }
 
       const onDragEnd = (result) => {
-         if (!result.destination) return;
+         if (!result.destination) return
          const newOrder = reorder(
             photos,
             result.source.index,
             result.destination.index
-         );
-         changeState(newOrder);
-      };
+         )
+         changeState(newOrder)
+      }
 
       const handleFiles = (fileList) => {
-         const validFiles = [];
+         const validFiles = []
          for (const file of fileList) {
             if (file.type.startsWith('image/')) {
-               validFiles.push(file);
+               validFiles.push(file)
             }
          }
          if (validFiles.length > 0) {
-            changeState([...photos, ...validFiles]);
+            changeState([...photos, ...validFiles])
          }
-      };
+      }
 
       const handleClick = () => {
          if (fileInputRef.current) {
-            fileInputRef.current.click();
+            fileInputRef.current.click()
          }
-      };
+      }
 
       const onFileChange = (e) => {
-         handleFiles(e.target.files);
-         e.target.value = null;
-      };
+         handleFiles(e.target.files)
+         e.target.value = null
+      }
 
       const onDrop = (e) => {
-         e.preventDefault();
-         e.stopPropagation();
+         e.preventDefault()
+         e.stopPropagation()
          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleFiles(e.dataTransfer.files);
+            handleFiles(e.dataTransfer.files)
          }
-      };
+      }
 
       const onDragOver = (e) => {
-         e.preventDefault();
-         e.stopPropagation();
-      };
+         e.preventDefault()
+         e.stopPropagation()
+      }
 
       const removePhoto = (index) => {
-         const updated = [...photos];
-         updated.splice(index, 1);
-         changeState(updated);
-      };
+         const updated = [...photos]
+         updated.splice(index, 1)
+         changeState(updated)
+      }
 
       return (
          <div className={styles.container}>
-            <label className={required ? styles.required : ''}>
-               {title}
-            </label>
+            {title_el}
 
             {/* DRAG / CLICK AREA */}
             <div
@@ -163,11 +179,12 @@ const Input = ({
                onDrop={onDrop}
                onDragOver={onDragOver}
                style={{
-                  border: '2px dashed #ccc',
+                  border      : '2px dashed #ccc',
                   borderRadius: '8px',
-                  padding: '20px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
+                  padding     : '20px',
+                  textAlign   : 'center',
+                  cursor      : 'pointer',
+                  width: '20%'
                }}
             >
                <p>{placeholder}</p>
@@ -175,12 +192,14 @@ const Input = ({
 
             {/* Hidden file input */}
             <input
+               className={input_class}
                ref={fileInputRef}
                type="file"
                multiple
                accept="image/*"
                onChange={onFileChange}
-               style={{ display: 'none' }}
+               style={{display: 'none'}}
+               name={name}
             />
 
             {/* IMAGE PREVIEWS + DRAG/REORDER */}
@@ -191,15 +210,16 @@ const Input = ({
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className={styles.photosContainer}
+                        name={name}
                         style={{
-                           display: 'flex',
-                           flexWrap: 'wrap',
-                           gap: '10px',
+                           display  : 'flex',
+                           flexWrap : 'wrap',
+                           gap      : '10px',
                            marginTop: '10px',
                         }}
                      >
                         {photos.map((file, index) => {
-                           const previewUrl = URL.createObjectURL(file);
+                           const previewUrl = URL.createObjectURL(file)
                            return (
                               <Draggable
                                  key={index.toString()}
@@ -212,12 +232,12 @@ const Input = ({
                                        {...provided.draggableProps}
                                        {...provided.dragHandleProps}
                                        style={{
-                                          width: '100px',
-                                          height: '100px',
-                                          position: 'relative',
-                                          border: '1px solid #ccc',
+                                          width       : '100px',
+                                          height      : '100px',
+                                          position    : 'relative',
+                                          border      : '1px solid #ccc',
                                           borderRadius: '4px',
-                                          overflow: 'hidden',
+                                          overflow    : 'hidden',
                                           ...provided.draggableProps.style,
                                        }}
                                     >
@@ -225,8 +245,8 @@ const Input = ({
                                           src={previewUrl}
                                           alt={`Photo ${index}`}
                                           style={{
-                                             width: '100%',
-                                             height: '100%',
+                                             width    : '100%',
+                                             height   : '100%',
                                              objectFit: 'cover',
                                           }}
                                        />
@@ -234,20 +254,20 @@ const Input = ({
                                        <button
                                           type="button"
                                           onClick={(e) => {
-                                             e.stopPropagation();
-                                             removePhoto(index);
+                                             e.stopPropagation()
+                                             removePhoto(index)
                                           }}
                                           style={{
-                                             position: 'absolute',
-                                             top: '5px',
-                                             right: '5px',
+                                             position       : 'absolute',
+                                             top            : '5px',
+                                             right          : '5px',
                                              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                             color: '#fff',
-                                             border: 'none',
-                                             borderRadius: '50%',
-                                             width: '20px',
-                                             height: '20px',
-                                             cursor: 'pointer',
+                                             color          : '#fff',
+                                             border         : 'none',
+                                             borderRadius   : '50%',
+                                             width          : '20px',
+                                             height         : '20px',
+                                             cursor         : 'pointer',
                                           }}
                                        >
                                           x
@@ -255,15 +275,17 @@ const Input = ({
                                     </div>
                                  )}
                               </Draggable>
-                           );
+                           )
                         })}
                         {provided.placeholder}
                      </div>
                   )}
                </Droppable>
             </DragDropContext>
+
+            {props.error && <div style={{bottom: '-10px'}} >{error_el}</div>}
          </div>
-      );
+      )
    }
 
    // ─────────────────────────────────────────────────────────────────
@@ -271,18 +293,18 @@ const Input = ({
    // ─────────────────────────────────────────────────────────────────
    if (props.options && Array.isArray(props.options)) {
       const handleSelectChange = (e) => {
-         changeState(e.target.value);
-      };
+         changeState(e.target.value)
+      }
 
       return (
          <div className={styles.container}>
-            <label className={required ? styles.required : ''}>
-               {title}
-            </label>
+            {title_el}
+
             <select
                value={value}
                onChange={handleSelectChange}
                required={required}
+               name={name}
                {...props}
             >
                {props.options.map((option, idx) => (
@@ -291,53 +313,140 @@ const Input = ({
                   </option>
                ))}
             </select>
+
+            {error_el}
          </div>
-      );
+      )
    }
 
    // ─────────────────────────────────────────────────────────────────
-   // 4) DEFAULT TEXT / TEXTAREA
+   // 4) RADIO/CHECK BUTTONS MODE (props.radios is an array)
+   //    (We can select multiple items with custom styling)
    // ─────────────────────────────────────────────────────────────────
-   const onChange = (e) => {
-      e.preventDefault();
-      changeState(e.target.value);
-   };
+   if (props.radios && Array.isArray(props.radios)) {
+      // We assume 'value' is an array of selected strings
+      const selectedValues = Array.isArray(value) ? value : []
+
+      // Toggle an item in selectedValues
+      const toggleItem = (item) => {
+         let updated = [...selectedValues]
+         if (updated.includes(item)) {
+            // Remove
+            updated = updated.filter((val) => val !== item)
+         } else {
+            // Add
+            updated.push(item)
+         }
+         changeState(updated)
+      }
+
+      // We'll display them 2 per row with an HTML table
+      // chunk the radios array into pairs
+      const chunkedRadios = []
+      for (let i = 0; i < props.radios.length; i += 2) {
+         chunkedRadios.push(props.radios.slice(i, i + 2))
+      }
+
+      return (
+         <div className={styles.container} style={{marginTop: '10px'}} >
+            {title_el}
+
+            <table className={styles.radio_table} name={name}>
+               <tbody>
+               {chunkedRadios.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                     {row.map((item, colIndex) => {
+                        const isSelected = selectedValues.includes(item)
+
+                        return (
+                           <td key={colIndex} className={styles.radio_container}>
+                              <div
+                                 className={clsx(styles.radio_btn, {[styles.selected]: isSelected})}
+                                 onClick={() => toggleItem(item)}
+                              >
+                                 {item}
+                              </div>
+                           </td>
+                        )
+                     })}
+                  </tr>
+               ))}
+               </tbody>
+            </table>
+
+            {error_el}
+         </div>
+      )
+   }
+
+   // ─────────────────────────────────────────────────────────────────
+   // 5) PHONE INPUT
+   // ─────────────────────────────────────────────────────────────────
+   if (type === "tel") {
+      return (
+         <div className={styles.container}>
+            {title_el}
+
+            <input
+               type="tel"
+               placeholder={placeholder}
+               required={required}
+               onChange={onChange}
+               value={value}
+               className={input_class}
+               name={name}
+            />
+
+            {error_el}
+         </div>
+      )
+   }
+
+   // ─────────────────────────────────────────────────────────────────
+   // 6) DEFAULT TEXT / TEXTAREA
+   // ─────────────────────────────────────────────────────────────────
 
    // Textarea
    if (props.rows) {
       return (
          <div className={styles.container}>
-            <label className={required ? styles.required : ''}>
-               {title}
-            </label>
+            {title_el}
+
             <textarea
                rows={props.rows}
+               className={input_class}
                onChange={onChange}
                placeholder={placeholder}
                value={value}
                required={required}
                {...props}
+               name={name}
             />
+
+            {error_el}
          </div>
-      );
+      )
    }
 
    // Standard input
    return (
       <div className={styles.container}>
-         <label className={required ? styles.required : ''}>
-            {title}
-         </label>
+         {title_el}
+
          <input
+            className={input_class}
             type={type}
             onChange={onChange}
             placeholder={placeholder}
             value={value}
             required={required}
             {...props}
+            name={name}
          />
-      </div>
-   );
-};
 
-export default Input;
+         {error_el}
+      </div>
+   )
+}
+
+export default Input
