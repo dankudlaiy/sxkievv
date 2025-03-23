@@ -286,6 +286,11 @@ const MyAnketa = ({ data }) => {
                      <FontAwesomeIcon icon={faPen} />
                      Редактировать
                   </Button>
+
+                  <Button style={{background: 'red'}} onClick={() => navigate(`/profile/delete-anketa/${data.id}`)}>
+                     <FontAwesomeIcon icon={faPen} />
+                     Удалить
+                  </Button>
                </div>
             </div>
          </div>
