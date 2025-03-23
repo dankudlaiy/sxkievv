@@ -36,7 +36,7 @@ const Auth = () => {
             if (data.token) {
                localStorage.setItem('authToken', data.token)
 
-               navigate('/')
+               window.location.href = '/'
             } else {
                setError("Data format is incorrect")
             }

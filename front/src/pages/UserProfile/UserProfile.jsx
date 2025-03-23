@@ -1,16 +1,14 @@
 import styles from './UserProfile.module.sass'
-import {NavLink, Outlet, useNavigate} from "react-router-dom"
+import {NavLink, Outlet} from "react-router-dom"
 import Button from "../../components/Button/Button"
-import {faCoins, faList, faRightFromBracket, faVenus} from "@fortawesome/free-solid-svg-icons"
+import {faCoins, faList, faRightFromBracket} from "@fortawesome/free-solid-svg-icons"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import React from "react"
 
 const UserProfile = () => {
-   const navigate = useNavigate()
-
    const logout = () => {
       localStorage.removeItem('authToken')
-      navigate('/')
+      window.location.href = '/'
    }
 
    return (

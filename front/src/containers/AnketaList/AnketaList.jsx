@@ -1,115 +1,195 @@
-import React, {useEffect, useState} from "react"
-import styles from "./AnketaList.module.sass"
-import Anketa from "../Anketa/Anketa"
-import {useSearchParams} from "react-router-dom"
-import Loader from "../../components/Loader/Loader"
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import styles from "./AnketaList.module.sass";
+import Anketa from "../Anketa/Anketa";
+import Loader from "../../components/Loader/Loader";
 
 const AnketaList = () => {
-   const [profiles, setProfiles] = useState([])
-   const [loading, setLoading] = useState(false)
-   const [error, setError] = useState(null)
-   const [searchParams] = useSearchParams()
-   const [skip, setSkip] = useState(0)
+   // We’ll load items in chunks of this size:
+   const PAGE_SIZE = 10;
 
+   const [profiles, setProfiles] = useState([]);
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState(null);
+
+   // Keep track if we can load more pages
+   const [hasMore, setHasMore] = useState(true);
+
+   const [searchParams] = useSearchParams();
+   const [skip, setSkip] = useState(0);
+
+   /**
+    * Transform any 'Lt' / 'Gt' URL params into recognized min/max parameters.
+    */
+   const buildQueryString = () => {
+      const sp = new URLSearchParams(searchParams);
+
+      // Price
+      const priceLt = sp.get("priceLt");
+      if (priceLt) {
+         sp.set("maxPrice", priceLt);
+         sp.delete("priceLt");
+      }
+      const priceGt = sp.get("priceGt");
+      if (priceGt) {
+         sp.set("minPrice", priceGt);
+         sp.delete("priceGt");
+      }
+
+      // Age
+      const ageLt = sp.get("ageLt");
+      if (ageLt) {
+         sp.set("maxAge", ageLt);
+         sp.delete("ageLt");
+      }
+      const ageGt = sp.get("ageGt");
+      if (ageGt) {
+         sp.set("minAge", ageGt);
+         sp.delete("ageGt");
+      }
+
+      // Weight
+      const weightLt = sp.get("weightLt");
+      if (weightLt) {
+         sp.set("maxWeight", weightLt);
+         sp.delete("weightLt");
+      }
+      const weightGt = sp.get("weightGt");
+      if (weightGt) {
+         sp.set("minWeight", weightGt);
+         sp.delete("weightGt");
+      }
+
+      // Height
+      const heightLt = sp.get("heightLt");
+      if (heightLt) {
+         sp.set("maxHeight", heightLt);
+         sp.delete("heightLt");
+      }
+      const heightGt = sp.get("heightGt");
+      if (heightGt) {
+         sp.set("minHeight", heightGt);
+         sp.delete("heightGt");
+      }
+
+      return sp.toString();
+   };
+
+   /**
+    * Fetch profiles from the server using the final query string.
+    * We check how many profiles came back. If it's < PAGE_SIZE, then we know
+    * there's no more data.
+    */
    const fetchProfiles = async () => {
-      setLoading(true)
-      const queryString = searchParams.toString()
+      setLoading(true);
+      setError(null);
+
       try {
+         const finalQuery = buildQueryString();
+
          const response = await fetch(
-            `/api/Profile/search?skip=${skip}&take=10&${queryString}`,
+            `/api/Profile/search?skip=${skip}&take=${PAGE_SIZE}&${finalQuery}`,
             {
-               method : "GET",
+               method: "GET",
                headers: {
                   "Content-Type": "*/*",
-                  Accept        : "*/*",
+                  Accept: "*/*",
                },
             }
-         )
+         );
 
-         const data = await response.json()
-         // const data = {
-         //    profiles: [
-         //       {
-         //          id          : 1,
-         //          name        : "test",
-         //          age         : 18,
-         //          photos      : [
-         //             'https://iso.500px.com/wp-content/uploads/2016/11/stock-photo-159533631-1500x1000.jpg',
-         //             'https://images.unsplash.com/photo-1495745966610-2a67f2297e5e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGhvdG9ncmFwaGVyfGVufDB8fDB8fHww',
-         //             'https://images.pexels.com/photos/3680219/pexels-photo-3680219.jpeg?cs=srgb&dl=pexels-lukas-rodriguez-1845331-3680219.jpg&fm=jpg',
-         //             'https://images.pexels.com/photos/2893685/pexels-photo-2893685.jpeg?cs=srgb&dl=pexels-ozgomz-2893685.jpg&fm=jpg'
-         //          ],
-         //          description : "Хватит уже наяривать ручками дома под одеялом, приезжай ко мне в гости и я покажу тебе что такое настоящий секс, бурный и жаркий как летний денёчек. Звони мне быстрее и приезжай пока я свободна.",
-         //          weight      : 50,
-         //          height      : 150,
-         //          hourPrice   : 2000,
-         //          twoHourPrice: 4000,
-         //          nightPrice  : 3000,
-         //       },
-         //       {
-         //          id          : 1,
-         //          name        : "test",
-         //          age         : 18,
-         //          photos      : [
-         //             'https://iso.500px.com/wp-content/uploads/2016/11/stock-photo-159533631-1500x1000.jpg',
-         //             'https://images.unsplash.com/photo-1495745966610-2a67f2297e5e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGhvdG9ncmFwaGVyfGVufDB8fDB8fHww',
-         //             'https://images.pexels.com/photos/3680219/pexels-photo-3680219.jpeg?cs=srgb&dl=pexels-lukas-rodriguez-1845331-3680219.jpg&fm=jpg',
-         //             'https://images.pexels.com/photos/2893685/pexels-photo-2893685.jpeg?cs=srgb&dl=pexels-ozgomz-2893685.jpg&fm=jpg'
-         //          ],
-         //          description : "Хватит уже наяривать ручками дома под одеялом, приезжай ко мне в гости и я покажу тебе что такое настоящий секс, бурный и жаркий как летний денёчек. Звони мне быстрее и приезжай пока я свободна.",
-         //          weight      : 50,
-         //          height      : 150,
-         //          hourPrice   : 2000,
-         //          twoHourPrice: 4000,
-         //          nightPrice  : 3000,
-         //       },
-         //    ]
-         // }
-         setProfiles(data.profiles)
+         if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+         }
+
+         const data = await response.json();
+         const newProfiles = data.profiles || [];
+
+         // If skip == 0, replace; otherwise append
+         setProfiles((prev) =>
+            skip === 0 ? newProfiles : [...prev, ...newProfiles]
+         );
+
+         // If we got fewer than PAGE_SIZE items, there's no more to load
+         if (newProfiles.length < PAGE_SIZE) {
+            setHasMore(false);
+         } else {
+            // Otherwise, we can still load more
+            setHasMore(true);
+         }
       } catch (err) {
-         setError(err.message)
+         setError(err.message);
       } finally {
-         setLoading(false)
+         setLoading(false);
       }
+   };
+
+   /**
+    * If user changes filters (URL changes), reset the list to first page.
+    * Also reset 'hasMore' to true so we can try again.
+    */
+   useEffect(() => {
+      setSkip(0);
+      setProfiles([]);
+      setHasMore(true);
+   }, [searchParams]);
+
+   /**
+    * Whenever skip changes OR searchParams changes, fetch new data.
+    */
+   useEffect(() => {
+      fetchProfiles();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [skip, searchParams]);
+
+   // RENDER LOGIC
+
+   if (!loading && !error && profiles.length === 0) {
+      return (
+         <div className={styles.container}>
+            <h2 className={styles.notFound}>Анкет с заданными фильтрами не найдено</h2>
+         </div>
+      );
    }
 
-   useEffect(() => {
-      setProfiles([])
-      setSkip(0)
-   }, [searchParams])
-
-   useEffect(() => {
-      fetchProfiles()
-   }, [skip])
-
-   if (!loading && !error && profiles.length === 0)
-      return <div className={styles.container}>
-         <h2 className={styles.notFound}>Профилей с заданными фильтрами не найдено</h2>
-      </div>
-
-   if (error)
-      return <div className={styles.container}>
-         <h2 className={styles.notFound}>Ошибка, попробуйте перезагрузить страницу: {error}</h2>
-      </div>
+   if (error) {
+      return (
+         <div className={styles.container}>
+            <h2 className={styles.notFound}>
+               Ошибка, попробуйте перезагрузить страницу: {error}
+            </h2>
+         </div>
+      );
+   }
 
    return (
       <div className={styles.container}>
          <div className={styles.wrapper}>
             {profiles.map((profile) => (
-               <Anketa key={profile.id} data={profile}/>
+               <Anketa key={profile.id} data={profile} />
             ))}
 
-            {!loading && (
+            {/*
+          Show the "Load more" button ONLY if:
+            1. Not loading
+            2. We have some profiles
+            3. hasMore is true (last fetch was full PAGE_SIZE)
+        */}
+            {!loading && profiles.length > 0 && hasMore && (
                <div className={styles.loadMoreContainer}>
-                  <button className={styles.loadMore} onClick={() => setSkip((prev) => prev + 10)}>
+                  <button
+                     className={styles.loadMore}
+                     onClick={() => setSkip((prev) => prev + PAGE_SIZE)}
+                  >
                      Загрузить ещё
                   </button>
                </div>
             )}
-            {loading && <Loader type="inpage"/>}
+
+            {loading && <Loader type="inpage" />}
          </div>
       </div>
-   )
-}
+   );
+};
 
-export default AnketaList
+export default AnketaList;

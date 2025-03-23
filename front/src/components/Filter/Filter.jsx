@@ -1,231 +1,212 @@
-import React, {useState} from 'react';
-import styles from './Filter.module.sass';
-import Select from "../Select/Select"
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faMagnifyingGlass, faUser} from "@fortawesome/free-solid-svg-icons"
-import Button from "../Button/Button"
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import styles from "./Filter.module.sass";
 
-const price_options = [
-   "Меньше чем 500грн",
-   "0грн-500грн",
-   "500грн-1000грн",
-   "1000грн-1500грн",
-   "1500грн-2000грн",
-   "2000грн-2500грн",
-   "2500грн-3000грн",
-   "3000грн-3500грн",
-   "3500грн-4000грн",
-   "4000грн-4500грн",
-   "4500грн-5000грн",
-   "5000грн-5500грн",
-   "5500грн-6000грн",
-   "Больше чем 6000грн"
-];
+import Select from "../Select/Select";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import Button from "../Button/Button";
 
-const age_options = [
-   "18-21",
-   "21-24",
-   "24-27",
-   "27-30",
-   "30-33",
-   "33-36",
-   "36-39",
-   "39-42",
-   "42-45",
-   "45-48",
-   "48-51",
-   "51-54",
-   "54-57",
-   "57-60",
-   "Больше чем 60"
-];
+import {
+   // import your options
+   price_options,
+   age_options,
+   weight_options,
+   height_options,
+   bust_size_options,
+   accepts_options,
+   district_metro_options,
+   services_options,
+} from "../../helpers/data";
 
-const weight_options = [
-   "Меньше чем 30",
-   "30-40",
-   "40-50",
-   "50-60",
-   "60-70",
-   "70-80",
-   "80-90",
-   "90-100",
-   "Больше чем 100"
-];
+import {
+   // The parsing/building helpers
+   parseSelection,
+   buildPriceStringFromParams,
+   buildAgeStringFromParams,
+   // ...similar "build" functions for weight/height if you wish
+} from "../../helpers/helpers.js"; // <-- place them wherever you like
 
-const height_options = [
-   "Меньше чем 145",
-   "145-150",
-   "150-155",
-   "155-160",
-   "160-165",
-   "165-170",
-   "170-175",
-   "175-180",
-   "180-185",
-   "185-190",
-   "190-195",
-   "195-200",
-   "200-205",
-   "Больше чем 205"
-];
-
-const bust_size_options = [
-   "1",
-   "2",
-   "3",
-   "4",
-   "5",
-   "6",
-   "7"
-];
-
-const accepts_options = [
-   "В апартаментах",
-   "Выезд к клиенту"
-];
-
-const district_metro_options = [
-   "Правый берег",
-   "Левый берег",
-   "Академгородок",
-   "Арсенальная",
-   "Берестейская",
-   "Бориспольская",
-   "Васильковская",
-   "Вокзальная",
-   "Выдубичи",
-   "Выставочный центр",
-   "Героев Днепра",
-   "Гидропарк",
-   "Голосеевская",
-   "Дарница",
-   "Демеевская",
-   "Днепр",
-   "Дорогожичи",
-   "Житомирская",
-   "Золотые ворота",
-   "Ипподром",
-   "Кловская",
-   "Контрактовая площадь",
-   "Красный хутор",
-   "Крещатик",
-   "Левобережная",
-   "Лесная",
-   "Лукьяновская",
-   "Лыбедская",
-   "Майдан Незалежности",
-   "Минская",
-   "Нивки",
-   "Оболонь",
-   "Олимпийская",
-   "Осокорки",
-   "Палац «Украина»",
-   "Палац спорта",
-   "Почайна",
-   "Площадь Льва Толстого",
-   "Позняки",
-   "Политехнический институт",
-   "Святошин",
-   "Славутич",
-   "Сырец",
-   "Тараса Шевченко",
-   "Театральная",
-   "Теремки",
-   "Университет",
-   "Харьковская",
-   "Черниговская",
-   "Шулявская",
-   "Голосеевский",
-   "Дарницкий",
-   "Деснянский",
-   "Днепровский",
-   "Оболонский",
-   "Печерский",
-   "Подольский",
-   "Святошинский",
-   "Соломенский",
-   "Шевченковский"
-];
-
-const services_options = [
-   "Секс классический",
-   "Секс анальный",
-   "Секс групповой",
-   "Секс лесбийский",
-   "Минет в презервативе",
-   "Минет без презерватива",
-   "Минет глубокий",
-   "Куннилингус",
-   "Секс игрушки",
-   "Ролевые игры",
-   "Услуги семейной паре",
-   "Окончание на грудь",
-   "Окончание на лицо",
-   "Окончание в рот",
-   "Фото/видео съемка",
-   "Минет в машине",
-   "Эскорт",
-   "Страпон",
-   "Анилингус делаю",
-   "Золотой дождь выдача",
-   "Золотой дождь прием",
-   "Копро выдача",
-   "Фистинг анальный",
-   "Фистинг классический",
-   "Стриптиз профи",
-   "Стриптиз не профи",
-   "Лесби откровенное",
-   "Лесби-шоу легкое",
-   "Массаж расслабляющий",
-   "Массаж классический",
-   "Массаж профи",
-   "Массаж тайский",
-   "Массаж урологический",
-   "Массаж точечный",
-   "Массаж эротический",
-   "Массаж ветка сакуры",
-   "Бондаж",
-   "Госпожа",
-   "Рабыня",
-   "БДСМ игры",
-   "Легкая доминация",
-   "Порка",
-   "Фетиш",
-   "Трамплинг"
-];
 
 const Filter = () => {
    const navigate = useNavigate();
+   const location = useLocation();
 
-   const [price, setPrice] = useState('');
-   const [age, setAge] = useState('');
-   const [weight, setWeight] = useState('');
-   const [height, setHeight] = useState('');
-   const [bustSize, setBustSize] = useState('');
-   const [accepts, setAccepts] = useState('');
-   const [districtMetro, setDistrictMetro] = useState('');
-   const [services, setServices] = useState('');
+   const [filters, setFilters] = useState({
+      price: "",
+      age: "",
+      weight: "",
+      height: "",
+      bustSize: "",
+      accepts: "",
+      districtMetro: "",
+      services: "",
+   });
+
+   // On mount or URL change, build the filter strings from the URL
+   useEffect(() => {
+      const queryParams = new URLSearchParams(location.search);
+
+      // Price
+      const priceLt = queryParams.get("priceLt");
+      const priceGt = queryParams.get("priceGt");
+      const minPrice = queryParams.get("minPrice");
+      const maxPrice = queryParams.get("maxPrice");
+      const priceString = buildPriceStringFromParams({ priceLt, priceGt, minPrice, maxPrice });
+
+      // Age
+      const minAge = queryParams.get("minAge");
+      const maxAge = queryParams.get("maxAge");
+      const ageString = buildAgeStringFromParams({ minAge, maxAge });
+
+      // Weight
+      const minWeight = queryParams.get("minWeight");
+      const maxWeight = queryParams.get("maxWeight");
+      let weightString = "";
+      if (queryParams.get("weightLt")) {
+         weightString = `Меньше чем ${queryParams.get("weightLt")}`;
+      } else if (queryParams.get("weightGt")) {
+         weightString = `Больше чем ${queryParams.get("weightGt")}`;
+      } else if (minWeight && maxWeight) {
+         weightString = `${minWeight}-${maxWeight}`;
+      }
+
+      // Height
+      const minHeight = queryParams.get("minHeight");
+      const maxHeight = queryParams.get("maxHeight");
+      let heightString = "";
+      if (queryParams.get("heightLt")) {
+         heightString = `Меньше чем ${queryParams.get("heightLt")}`;
+      } else if (queryParams.get("heightGt")) {
+         heightString = `Больше чем ${queryParams.get("heightGt")}`;
+      } else if (minHeight && maxHeight) {
+         heightString = `${minHeight}-${maxHeight}`;
+      }
+
+      // bustSize, accepts, district, services
+      const bustSize = queryParams.get("breastSize") || "";
+      const accepts = queryParams.get("apartment")
+         ? "В апартаментах"
+         : queryParams.get("toClient")
+            ? "Выезд к клиенту"
+            : "";
+      const districtMetro = queryParams.get("district") || "";
+      const services = queryParams.get("favour") || "";
+
+      setFilters({
+         price: priceString,
+         age: ageString,
+         weight: weightString,
+         height: heightString,
+         bustSize,
+         accepts,
+         districtMetro,
+         services,
+      });
+   }, [location.search]);
 
    const handleSearch = () => {
-      const queryParamsObject = {
-         minPrice: price ? price.split('-')[0] : undefined,
-         maxPrice: price ? price.split('-')[1] : undefined,
-         minAge: age ? age.split('-')[0] : undefined,
-         maxAge: age ? age.split('-')[1] : undefined,
-         minWeight: weight ? weight.split('-')[0] : undefined,
-         maxWeight: weight ? weight.split('-')[1] : undefined,
-         minHeight: height ? height.split('-')[0] : undefined,
-         maxHeight: height ? height.split('-')[1] : undefined,
-         breastSize: bustSize || undefined,
-         apartment: accepts === 'Апартаменты' ? true : undefined,
-         toClient: accepts === 'Клиент' ? true : undefined,
-         district: districtMetro || undefined,
-         favour: services || undefined
-      };
+      const { price, age, weight, height, bustSize, accepts, districtMetro, services } = filters;
 
+      const queryParamsObject = {};
+
+      /**
+       * PRICE
+       */
+      if (price) {
+         const parsed = parseSelection(price);
+         if (parsed) {
+            if (parsed.type === "lt") {
+               queryParamsObject.priceLt = parsed.number; // e.g. 500
+            } else if (parsed.type === "gt") {
+               queryParamsObject.priceGt = parsed.number;
+            } else if (parsed.type === "range") {
+               queryParamsObject.minPrice = parsed.min;
+               queryParamsObject.maxPrice = parsed.max;
+            }
+         }
+      }
+
+      /**
+       * AGE
+       */
+      if (age) {
+         const parsed = parseSelection(age);
+         if (parsed && parsed.type === "range") {
+            queryParamsObject.minAge = parsed.min;
+            queryParamsObject.maxAge = parsed.max;
+         } else if (parsed?.type === "lt") {
+            // if you want "lt" for age too:
+            queryParamsObject.ageLt = parsed.number;
+         } else if (parsed?.type === "gt") {
+            queryParamsObject.ageGt = parsed.number;
+         }
+      }
+
+      /**
+       * WEIGHT
+       */
+      if (weight) {
+         const parsed = parseSelection(weight);
+         if (parsed) {
+            if (parsed.type === "lt") {
+               queryParamsObject.weightLt = parsed.number;
+            } else if (parsed.type === "gt") {
+               queryParamsObject.weightGt = parsed.number;
+            } else if (parsed.type === "range") {
+               queryParamsObject.minWeight = parsed.min;
+               queryParamsObject.maxWeight = parsed.max;
+            }
+         }
+      }
+
+      /**
+       * HEIGHT
+       */
+      if (height) {
+         const parsed = parseSelection(height);
+         if (parsed) {
+            if (parsed.type === "lt") {
+               queryParamsObject.heightLt = parsed.number;
+            } else if (parsed.type === "gt") {
+               queryParamsObject.heightGt = parsed.number;
+            } else if (parsed.type === "range") {
+               queryParamsObject.minHeight = parsed.min;
+               queryParamsObject.maxHeight = parsed.max;
+            }
+         }
+      }
+
+      /**
+       * BUST SIZE
+       */
+      if (bustSize) {
+         queryParamsObject.breastSize = bustSize;
+      }
+
+      /**
+       * ACCEPTS
+       */
+      if (accepts === "В апартаментах") {
+         queryParamsObject.apartment = true;
+      } else if (accepts === "Выезд к клиенту") {
+         queryParamsObject.toClient = true;
+      }
+
+      /**
+       * DISTRICT / SERVICES
+       */
+      if (districtMetro) {
+         queryParamsObject.district = districtMetro;
+      }
+      if (services) {
+         queryParamsObject.favour = services;
+      }
+
+      /**
+       * Build the final URL
+       */
       const queryParams = new URLSearchParams();
-
       Object.keys(queryParamsObject).forEach((key) => {
          if (queryParamsObject[key] !== undefined) {
             queryParams.append(key, queryParamsObject[key]);
@@ -235,22 +216,66 @@ const Filter = () => {
       navigate(`/?${queryParams.toString()}`);
    };
 
-   return (
-       <div className={styles.container}>
-          <Select title="Цена за час" options={price_options} value={price} changeState={setPrice} />
-          <Select title="Возраст" options={age_options} value={age} changeState={setAge} />
-          <Select title="Вес" options={weight_options} value={weight} changeState={setWeight} />
-          <Select title="Рост" options={height_options} value={height} changeState={setHeight} />
-          <Select title="Размер груди" options={bust_size_options} value={bustSize} changeState={setBustSize} />
-          <Select title="Принимает" options={accepts_options} value={accepts} changeState={setAccepts} />
-          <Select title="Район и Метро" options={district_metro_options} value={districtMetro} changeState={setDistrictMetro} />
-          <Select title="Услуги" options={services_options} value={services} changeState={setServices} />
+   const updateFilterField = (fieldName, value) => {
+      setFilters((prev) => ({ ...prev, [fieldName]: value }));
+   };
 
-          <Button style={{ fontWeight: '600' }} onClick={handleSearch}>
-             <FontAwesomeIcon icon={faMagnifyingGlass} />
-             Поиск
-          </Button>
-       </div>
+   return (
+      <div className={styles.container}>
+         <Select
+            title="Цена за час"
+            options={price_options}
+            value={filters.price}
+            changeState={(val) => updateFilterField("price", val)}
+         />
+         <Select
+            title="Возраст"
+            options={age_options}
+            value={filters.age}
+            changeState={(val) => updateFilterField("age", val)}
+         />
+         <Select
+            title="Вес"
+            options={weight_options}
+            value={filters.weight}
+            changeState={(val) => updateFilterField("weight", val)}
+         />
+         <Select
+            title="Рост"
+            options={height_options}
+            value={filters.height}
+            changeState={(val) => updateFilterField("height", val)}
+         />
+         <Select
+            title="Размер груди"
+            options={bust_size_options}
+            value={filters.bustSize}
+            changeState={(val) => updateFilterField("bustSize", val)}
+         />
+         <Select
+            title="Принимает"
+            options={accepts_options}
+            value={filters.accepts}
+            changeState={(val) => updateFilterField("accepts", val)}
+         />
+         <Select
+            title="Район и Метро"
+            options={district_metro_options}
+            value={filters.districtMetro}
+            changeState={(val) => updateFilterField("districtMetro", val)}
+         />
+         <Select
+            title="Услуги"
+            options={services_options}
+            value={filters.services}
+            changeState={(val) => updateFilterField("services", val)}
+         />
+
+         <Button style={{ fontWeight: "600" }} onClick={handleSearch}>
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            Поиск
+         </Button>
+      </div>
    );
 };
 

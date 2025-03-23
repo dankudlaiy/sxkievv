@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faUser, faBars } from "@fortawesome/free-solid-svg-icons"
 import React, { useEffect, useState } from "react"
 import {NavLink, useNavigate} from "react-router-dom"
+import {login_url} from "../../helpers/data"
 
 const Header = () => {
    const navigate = useNavigate()
@@ -88,7 +89,7 @@ const Header = () => {
             <Button
                style={{ fontWeight: '600' }}
                onClick={() => {
-                  window.location.href = 'https://t.me/sxkiev_bot'
+                  window.location.href = login_url
                }}
             >
                <FontAwesomeIcon icon={faUser} />

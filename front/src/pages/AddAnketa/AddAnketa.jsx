@@ -1,11 +1,14 @@
 import styles from './AddAnketa.module.sass'
 import Input from "../../components/Input/Input"
-import {useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import Hr from "../../components/Hr"
-import {kievNeighborhoodsAndMetros, packageArray, packages, plans, servicesList} from "../../helpers/data"
+import {kievNeighborhoodsAndMetros, plans, servicesList} from "../../helpers/data"
 import Button from "../../components/Button/Button"
 import Loader from "../../components/Loader/Loader"
 import AnketaPackageSelector from "./PackageSelector"
+import {faList} from "@fortawesome/free-solid-svg-icons"
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import {NavLink} from "react-router-dom"
 
 
 
@@ -155,6 +158,10 @@ const AddAnketa = () => {
          newErrors.phone = "Введите корректный номер (10–15 цифр, можно с + в начале)"
       }
 
+      if (!values.access || values.access.length === 0) {
+         newErrors.access = "Выберете минимум один вариант"
+      }
+
       // **Check if package selected**
       if (!values.package) {
          newErrors.package = "Выберите пакет"
@@ -230,6 +237,8 @@ const AddAnketa = () => {
          }
 
          // 2) Create post
+         // console.log('aparts', values.access[0] === 'В апартаментах' || values.access[1] === 'В апартаментах')
+         // console.log('client', values.access[0] === 'Выезд к клиенту' || values.access[1] === 'Выезд к клиенту')
          const res = await fetch('/api/Profile', {
             method: 'POST',
             headers: {
@@ -244,11 +253,12 @@ const AddAnketa = () => {
                height: +values.height,
                breast: +values.boobs,
                weight: +values.weight,
+               phone: values.phone,
                hourPrice: +values.hour,
                twoHourPrice: +values.twoHour,
                nightPrice: +values.night,
-               apartment: values.access === 'В апартаментах' || values.access === 'Оба варианта',
-               toClient: values.access === 'Выезд к клиенту' || values.access === 'Оба варианта',
+               apartment: values.access[0] === 'В апартаментах' || values.access[1] === 'В апартаментах',
+               toClient: values.access[0] === 'Выезд к клиенту' || values.access[1] === 'Выезд к клиенту',
                planId: getPackageType(values.package, values.term), // see note below
                media: mediaIds,
                districts: Array.isArray(values.area) ? values.area : [values.area],
@@ -264,8 +274,15 @@ const AddAnketa = () => {
    }
 
    if (success) return (
-      <div className={styles.container}>
-         <h2>Анкета успешно добавлена <br/>После одобрения администратором вы сможете увидеть ее в разделе мои анкеты</h2>
+      <div className={styles.container} style={{padding: '30vh 0'}}>
+         <h2 style={{textAlign: 'center', marginBottom: '30px'}}>Анкета успешно добавлена <br/>После одобрения администратором вы сможете увидеть ее в разделе мои анкеты</h2>
+
+         <NavLink to="/profile/my-anketas">
+            <Button >
+               <FontAwesomeIcon icon={faList}/>
+               Мои анкеты
+            </Button>
+         </NavLink>
       </div>
    )
 
@@ -451,7 +468,7 @@ const AddAnketa = () => {
                />
 
                <Input
-                  options={['Скрыта', 'Активна']}
+                  options={['Активна', 'Скрыта']}
                   placeholder="Доступность анкеты"
                   title="Доступность анкеты"
                   required={true}
