@@ -7,7 +7,6 @@ const Auth = () => {
    // const [profiles, setProfiles] = useState([])
    const [loading, setLoading] = useState(true)
    const [error, setError] = useState(null)
-   const navigate = useNavigate()
 
    useEffect(() => {
       const auth = async () => {

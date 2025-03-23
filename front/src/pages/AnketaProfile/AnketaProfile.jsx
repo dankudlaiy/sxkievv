@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import styles from './AnketaProfile.module.sass'
 import clsx from 'clsx'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faVenus, faChevronLeft, faChevronRight, faCheck, faUser, faArrowLeft} from '@fortawesome/free-solid-svg-icons'
+import {faVenus, faChevronLeft, faChevronRight, faCheck, faArrowLeft} from '@fortawesome/free-solid-svg-icons'
 import Button from "../../components/Button/Button"
 import {useNavigate, useParams} from "react-router-dom"
 import Loader from "../../components/Loader/Loader"
@@ -41,7 +41,7 @@ export default function AnketaProfile({}) {
    }, [isMobile, data]) // Re-run when mobile state or data changes
 
 
-   const fetchProfiles = async () => {
+   const fetchProfile = async () => {
       console.log(id)
 
       const res = await fetch(
@@ -63,9 +63,6 @@ export default function AnketaProfile({}) {
 
       const res_data = await res.json()
 
-      console.log(res_data)
-      console.log([res_data.apartment && 'У себя', res_data.toClient && 'Выезд к клиенту'].filter(Boolean))
-
       setData({
          ...res_data,
          access: [res_data.apartment && 'У себя', res_data.toClient && 'Выезд к клиенту'].filter(Boolean),
@@ -77,7 +74,7 @@ export default function AnketaProfile({}) {
 
    // Simulate async data load
    useEffect(() => {
-      fetchProfiles()
+      fetchProfile()
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [])
 

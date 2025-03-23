@@ -27,24 +27,38 @@ function mapTerm(term) {
 }
 
 function getPackageType(packageName, term) {
-   let x_package = 1
-   let x_term = 1
-   
-   if (packageName === 'Стандарт')
-      x_package = 1
-   if (packageName === 'Голд')
-      x_package = 2
-   if (packageName === 'Вип')
-      x_package = 3
+   let package_id = 1
 
-   if (term === "1 месяц")
-      x_term = 1
-   if (term === "2 месяца")
-      x_term = 2
-   if (term === "3 месяца")
-      x_term = 3
+   console.log(packageName, term)
    
-   return x_package * x_term;
+   if (packageName === 'Стандарт') {
+      if (term === "1 месяц")
+         package_id = 1
+      if (term === "2 месяца")
+         package_id = 2
+      if (term === "3 месяца")
+         package_id = 3
+   }
+
+   if (packageName === 'Голд') {
+      if (term === "1 месяц")
+         package_id = 4
+      if (term === "2 месяца")
+         package_id = 5
+      if (term === "3 месяца")
+         package_id = 6
+   }
+
+   if (packageName === 'Вип') {
+      if (term === "1 месяц")
+         package_id = 7
+      if (term === "2 месяца")
+         package_id = 8
+      if (term === "3 месяца")
+         package_id = 9
+   }
+
+   return package_id
 }
 
 
@@ -198,9 +212,10 @@ const AddAnketa = () => {
       return data.map(item => item.id) // return array of ids
    }
 
-
    const submitHandler = async (e) => {
       e.preventDefault()
+      console.log(values)
+      console.log(getPackageType(values.package, values.term))
 
       const { isValid, newErrors } = validateForm(values)
       setErrors(newErrors)

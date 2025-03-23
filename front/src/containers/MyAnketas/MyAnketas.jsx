@@ -1,9 +1,7 @@
 import styles from './MyAnketas.module.sass'
 import React, {useEffect, useState} from "react"
-import Loader from "../../components/Loader/Loader"
 import {useSearchParams} from "react-router-dom"
-import Anketa from "../Anketa/Anketa"
-import AdminAnketa from "../AdminAnketa/AdminAnketa"
+import MyAnketa from "./MyAnketa"
 
 const MyAnketas = () => {
    const [profiles, setProfiles] = useState([])
@@ -14,59 +12,24 @@ const MyAnketas = () => {
 
    const fetchProfiles = async () => {
       setLoading(true)
-      const queryString = searchParams.toString()
-      try {
-         // const response = await fetch(
-         //     `/api/Profile/search?skip=${skip}&take=10&${queryString}`,
-         //     {
-         //        method: "GET",
-         //        headers: {
-         //           "Content-Type": "*/*",
-         //           Accept: "*/*",
-         //        },
-         //     }
-         // );
 
-         // const data = await response.json();
-         const data = {
-            profiles: [
-               {
-                  id          : 1,
-                  name        : "test",
-                  age         : 18,
-                  photos      : [
-                     'https://iso.500px.com/wp-content/uploads/2016/11/stock-photo-159533631-1500x1000.jpg',
-                     'https://images.unsplash.com/photo-1495745966610-2a67f2297e5e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGhvdG9ncmFwaGVyfGVufDB8fDB8fHww',
-                     'https://images.pexels.com/photos/3680219/pexels-photo-3680219.jpeg?cs=srgb&dl=pexels-lukas-rodriguez-1845331-3680219.jpg&fm=jpg',
-                     'https://images.pexels.com/photos/2893685/pexels-photo-2893685.jpeg?cs=srgb&dl=pexels-ozgomz-2893685.jpg&fm=jpg'
-                  ],
-                  description : "Хватит уже наяривать ручками дома под одеялом, приезжай ко мне в гости и я покажу тебе что такое настоящий секс, бурный и жаркий как летний денёчек. Звони мне быстрее и приезжай пока я свободна.",
-                  weight      : 50,
-                  height      : 150,
-                  hourPrice   : 2000,
-                  twoHourPrice: 4000,
-                  nightPrice  : 3000,
+      try {
+         const response = await fetch(
+            `/api/Profile?take=10&skip=0`,
+            {
+               method: "GET",
+               headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                  "Content-Type": "*/*",
+                  Accept: "*/*",
                },
-               {
-                  id          : 1,
-                  name        : "test",
-                  age         : 18,
-                  photos      : [
-                     'https://iso.500px.com/wp-content/uploads/2016/11/stock-photo-159533631-1500x1000.jpg',
-                     'https://images.unsplash.com/photo-1495745966610-2a67f2297e5e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGhvdG9ncmFwaGVyfGVufDB8fDB8fHww',
-                     'https://images.pexels.com/photos/3680219/pexels-photo-3680219.jpeg?cs=srgb&dl=pexels-lukas-rodriguez-1845331-3680219.jpg&fm=jpg',
-                     'https://images.pexels.com/photos/2893685/pexels-photo-2893685.jpeg?cs=srgb&dl=pexels-ozgomz-2893685.jpg&fm=jpg'
-                  ],
-                  description : "Хватит уже наяривать ручками дома под одеялом, приезжай ко мне в гости и я покажу тебе что такое настоящий секс, бурный и жаркий как летний денёчек. Звони мне быстрее и приезжай пока я свободна.",
-                  weight      : 50,
-                  height      : 150,
-                  hourPrice   : 2000,
-                  twoHourPrice: 4000,
-                  nightPrice  : 3000,
-               },
-            ]
-         }
-         setProfiles(data.profiles)
+            }
+         );
+
+         const res_data = await response.json()
+         console.log(res_data)
+
+         setProfiles(res_data)
       } catch (err) {
          setError(err.message)
       } finally {
@@ -89,7 +52,7 @@ const MyAnketas = () => {
       <div className={styles.container}>
          <div className={styles.wrapper}>
             {profiles.map((profile) => (
-               <AdminAnketa key={profile.id} data={profile}/>
+               <MyAnketa key={profile.id} data={profile}/>
             ))}
             {!loading && (
                <div className={styles.loadMoreContainer}>

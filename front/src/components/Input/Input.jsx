@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useRef} from 'react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import styles from './Input.module.sass'
 import clsx from "clsx"
@@ -36,26 +36,43 @@ const Input = ({
    // 1) VIDEO MODE (single video)
    // ─────────────────────────────────────────────────────────────────
    if (type === 'video') {
-      // For video, value is a single File or null
-      const videoFile = value instanceof File ? value : null
+      // value can be:
+      // 1) A File object (newly selected video)
+      // 2) An object { url: "/uploads/xxx.mp4", fromServer: true }
+      // 3) Or null/empty if no video selected
+      const isFile = value instanceof File;
+      const isServerVideo = value && typeof value === 'object' && value.fromServer;
+
+      // Extract the "display name" for the video
+      let videoName = null;
+
+      if (isFile) {
+         // A newly selected file
+         videoName = value.name;
+      } else if (isServerVideo) {
+         // Existing server video => parse filename from the URL
+         const parts = value.url.split('/');
+         videoName = parts[parts.length - 1];
+         // e.g. "2025-03-21 07-52-51.mp4"
+      }
 
       const handleClick = () => {
          if (fileInputRef.current) {
-            fileInputRef.current.click()
+            fileInputRef.current.click();
          }
-      }
+      };
 
       const onFileChange = (e) => {
-         const selectedFiles = e.target.files
+         const selectedFiles = e.target.files;
          if (selectedFiles && selectedFiles[0]) {
-            const file = selectedFiles[0]
+            const file = selectedFiles[0];
             // Accept only videos
             if (file.type.startsWith('video/')) {
-               changeState(file)
+               changeState(file); // This updates your `values.video` to the new File
             }
          }
-         e.target.value = null // reset so user can select the same file again if desired
-      }
+         e.target.value = null; // reset so user can select the same file again if desired
+      };
 
       return (
          <div className={styles.container}>
@@ -66,17 +83,17 @@ const Input = ({
                className={styles.dragArea}
                onClick={handleClick}
                style={{
-                  border      : '2px dashed #ccc',
+                  border: '2px dashed #ccc',
                   borderRadius: '8px',
-                  padding     : '20px',
-                  textAlign   : 'center',
-                  cursor      : 'pointer',
+                  padding: '20px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
                }}
             >
-               {videoFile ? (
+               {videoName ? (
                   <>
-                     <p>{videoFile.name}</p>
-                     <p style={{fontStyle: 'italic', marginTop: '5px'}}>
+                     <p>{videoName}</p>
+                     <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
                         Нажмите, чтобы выбрать другое видео
                      </p>
                   </>
@@ -92,14 +109,15 @@ const Input = ({
                type="file"
                accept="video/*"
                onChange={onFileChange}
-               style={{display: 'none'}}
+               style={{ display: 'none' }}
                name={name}
             />
 
             {error_el}
          </div>
-      )
+      );
    }
+
 
    // ─────────────────────────────────────────────────────────────────
    // 2) PHOTOS MODE (multiple images with reorder)
@@ -168,6 +186,23 @@ const Input = ({
          changeState(updated)
       }
 
+      function getPreviewURL(item) {
+         // If it's an actual File object:
+         if (item instanceof File) {
+            return URL.createObjectURL(item);
+         }
+         // If it's an object from the server (with a .url property):
+         if (typeof item === "object" && item.fromServer) {
+            return item.url;
+         }
+         // If it's just a string path (server URL):
+         if (typeof item === "string") {
+            return item;
+         }
+         return ""; // fallback
+      }
+
+
       return (
          <div className={styles.container}>
             {title_el}
@@ -219,7 +254,8 @@ const Input = ({
                         }}
                      >
                         {photos.map((file, index) => {
-                           const previewUrl = URL.createObjectURL(file)
+                           const previewUrl = getPreviewURL(file)
+
                            return (
                               <Draggable
                                  key={index.toString()}
