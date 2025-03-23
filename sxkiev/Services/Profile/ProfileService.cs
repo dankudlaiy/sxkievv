@@ -13,6 +13,10 @@ public class ProfileService : IProfileService
 {
     private readonly IRepository<SxKievUser> _userRepository;
     private readonly IRepository<SxKievProfile> _profileRepository;
+    private readonly IRepository<ProfileDistrict> _districtRepository;
+    private readonly IRepository<ProfileFavour> _favourRepository;
+    private readonly IRepository<ProfileMedia> _mediaRepository;
+    private readonly IRepository<ProfileAction> _actionRepository;
     private readonly TelegramBotClient _botClient;
     private readonly IMediaService _mediaService;
     private readonly IPlanService _planService;
@@ -21,12 +25,18 @@ public class ProfileService : IProfileService
 
     public ProfileService(IRepository<SxKievProfile> profileRepository, IConfiguration configuration, 
         IServiceProvider serviceProvider, IRepository<SxKievUser> userRepository, 
-        IMediaService mediaService, IWebHostEnvironment webHostEnvironment, IPlanService planService)
+        IMediaService mediaService, IWebHostEnvironment webHostEnvironment, IPlanService planService, 
+        IRepository<ProfileDistrict> districtRepository, IRepository<ProfileFavour> favourRepository, 
+        IRepository<ProfileMedia> mediaRepository, IRepository<ProfileAction> actionRepository)
     {
         _profileRepository = profileRepository;
         _userRepository = userRepository;
         _mediaService = mediaService;
         _planService = planService;
+        _districtRepository = districtRepository;
+        _favourRepository = favourRepository;
+        _mediaRepository = mediaRepository;
+        _actionRepository = actionRepository;
         _rootPath = webHostEnvironment.WebRootPath;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
         _adminChatId = long.Parse(serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
@@ -60,12 +70,14 @@ public class ProfileService : IProfileService
                 Age = x.Age,
                 Breast = x.Breast,
                 CreatedAt = x.CreatedAt,
+                ExpirationDate = x.ExpirationDate,
                 Description = x.Description,
                 Phone = x.Phone,
                 Height = x.Height,
                 Id = x.Id,
                 Name = x.Name,
                 Type = x.Plan.Type,
+                Status = x.Status,
                 Weight = x.Weight,
                 HourPrice = x.HourPrice,
                 TwoHourPrice = x.TwoHourPrice,
@@ -80,10 +92,31 @@ public class ProfileService : IProfileService
             .ToListAsync();
     }
 
+    public async Task<ActionsResponseModel> GetActionsAsync(Guid profileId, string action)
+    {
+        var query = _actionRepository
+            .Query(x => x.ProfileId == profileId && x.Action == action)
+            .GroupBy(x => x.Date)
+            .OrderByDescending(x => x.Key)
+            .Select(x => new ActionResponseModel
+            {
+                Date = x.Key,
+                Action = action,
+                Count = x.Count()
+            });
+        
+        var responseModel = new ActionsResponseModel
+        {
+            Actions = await query.ToListAsync()
+        };
+        
+        return responseModel;
+    }
+
     public async Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input)
     {
         var query = _profileRepository.Query(x =>
-            x.IsActive && x.IsRejected != true && x.IsBanned != true && x.ExpirationDate > DateTime.UtcNow);
+            x.Status == ProfileStatus.Active && x.ExpirationDate > DateTime.UtcNow);
 
         if (input.MinPrice is not null && input.MaxPrice is not null)
         {
@@ -139,12 +172,14 @@ public class ProfileService : IProfileService
                 Age = x.Age,
                 Breast = x.Breast,
                 CreatedAt = x.CreatedAt,
+                ExpirationDate = x.ExpirationDate,
                 Description = x.Description,
                 Phone = x.Phone,
                 Height = x.Height,
                 Id = x.Id,
                 Name = x.Name,
                 Type = x.Plan.Type,
+                Status = x.Status,
                 Weight = x.Weight,
                 HourPrice = x.HourPrice,
                 TwoHourPrice = x.TwoHourPrice,
@@ -176,12 +211,14 @@ public class ProfileService : IProfileService
                 Age = x.Age,
                 Breast = x.Breast,
                 CreatedAt = x.CreatedAt,
+                ExpirationDate = x.ExpirationDate,
                 Description = x.Description,
                 Phone = x.Phone,
                 Height = x.Height,
                 Id = x.Id,
                 Name = x.Name,
                 Type = x.Plan.Type,
+                Status = x.Status,
                 Weight = x.Weight,
                 HourPrice = x.HourPrice,
                 TwoHourPrice = x.TwoHourPrice,
@@ -197,8 +234,135 @@ public class ProfileService : IProfileService
         return profile;
     }
 
-    public async Task UpdateProfileAsync(SxKievProfile profile)
+    public async Task UpdateProfileAsync(Guid id, UpdateProfileInputModel inputModel)
     {
+        var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == id);
+        
+        if (profile is null) throw new Exception("Profile not found");
+
+        if (!string.IsNullOrEmpty(inputModel.Name))
+        {
+            profile.Name = inputModel.Name;
+        }
+
+        if (!string.IsNullOrEmpty(inputModel.Description))
+        {
+            profile.Description = inputModel.Description;
+        }
+        
+        if (!string.IsNullOrEmpty(inputModel.Phone))
+        {
+            profile.Phone = inputModel.Phone;
+        }
+
+        if (inputModel.Age is not null)
+        {
+            profile.Age = inputModel.Age.Value;
+        }
+
+        if (inputModel.Height is not null)
+        {
+            profile.Height = inputModel.Height.Value;
+        }
+
+        if (inputModel.Breast is not null)
+        {
+            profile.Breast = inputModel.Breast.Value;
+        }
+
+        if (inputModel.Weight is not null)
+        {
+            profile.Weight = inputModel.Weight.Value;
+        }
+
+        if (inputModel.HourPrice is not null)
+        {
+            profile.HourPrice = inputModel.HourPrice.Value;
+        }
+
+        if (inputModel.TwoHourPrice is not null)
+        {
+            profile.TwoHourPrice = inputModel.TwoHourPrice.Value;
+        }
+
+        if (inputModel.NightPrice is not null)
+        {
+            profile.NightPrice = inputModel.NightPrice.Value;
+        }
+        
+        if (inputModel.Apartment is not null)
+        {
+            profile.Apartment = inputModel.Apartment.Value;
+        }
+
+        if (inputModel.ToClient is not null)
+        {
+            profile.ToClient = inputModel.ToClient.Value;
+        }
+
+        if (inputModel.PlanId is not null)
+        {
+            var oldPlan = await _planService.GetProfileById(profile.PlanId);
+            var plan = await _planService.GetProfileById(inputModel.PlanId.Value);
+
+            if (plan is null || oldPlan is null) throw new Exception("Plan not found");
+
+            if (DateTime.UtcNow < profile.ExpirationDate)
+            {
+                var daysLeft = (profile.ExpirationDate - DateTime.UtcNow).Days;
+                var oldPricePerDay = oldPlan.Price / oldPlan.Duration * 30;
+                var newPricePerDay = plan.Price / plan.Duration * 30;
+
+                var cof = oldPricePerDay / newPricePerDay;
+                var newDaysLeft = daysLeft * cof;
+                profile.ExpirationDate = DateTime.UtcNow.AddDays(newDaysLeft);
+            }
+
+            profile.PlanId = inputModel.PlanId.Value;
+        }
+
+        if (inputModel.Districts is not null)
+        {
+            await _districtRepository.DeleteAsync(x => x.ProfileId == profile.Id);
+            
+            foreach (var district in inputModel.Districts)
+            {
+                profile.Districts.Add(new ProfileDistrict
+                {
+                    ProfileId = profile.Id,
+                    District = district
+                });
+            }
+        }
+
+        if (inputModel.Favours is not null)
+        {
+            await _favourRepository.DeleteAsync(x => x.ProfileId == profile.Id);
+            
+            foreach (var favour in inputModel.Favours)
+            {
+                profile.Favours.Add(new ProfileFavour
+                {
+                    ProfileId = profile.Id,
+                    Favour = favour
+                });
+            }
+        }
+
+        if (inputModel.Media is not null)
+        {
+            await _mediaRepository.DeleteAsync(x => x.ProfileId == profile.Id);
+
+            foreach (var media in inputModel.Media)
+            {
+                profile.Media.Add(new ProfileMedia
+                {
+                    ProfileId = profile.Id,
+                    MediaId = media
+                });
+            }
+        }
+        
         await _profileRepository.UpdateAsync(profile);
     }
 
@@ -265,6 +429,18 @@ public class ProfileService : IProfileService
             caption: $"Новая анкета: {profile.Name}\nhttp://localhost:3000/{profile.Id}", replyMarkup: adminKeyboard);
 
         return createdProfile;
+    }
+
+    public async Task AddAction(Guid profileId, ActionInputModel inputModel)
+    {
+        var action = new ProfileAction
+        {
+            Action = inputModel.Action,
+            ProfileId = profileId,
+            Date = DateTime.UtcNow
+        };
+
+        await _actionRepository.AddAsync(action);
     }
 
     public async Task DeleteProfileAsync(Guid id)

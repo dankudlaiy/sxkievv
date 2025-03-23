@@ -135,7 +135,7 @@ public class BotService : IBotService
         
         if (profile is null) throw new Exception("No profile found");
 
-        profile.IsActive = true;
+        profile.Status = ProfileStatus.Active;
         await _profileRepository.UpdateAsync(profile);
 
         return profile;
@@ -147,7 +147,7 @@ public class BotService : IBotService
         
         if (profile is null) throw new Exception("No profile found");
 
-        profile.IsRejected = true;
+        profile.Status = ProfileStatus.Rejected;
         await _profileRepository.UpdateAsync(profile);
 
         return profile;

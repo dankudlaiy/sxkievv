@@ -19,10 +19,7 @@ public class SxKievProfile
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime ExpirationDate { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsRejected { get; set; }
-    public bool IsBanned { get; set; }
-    // public bool IsPromoted { get; set; }
+    public ProfileStatus Status { get; set; } = ProfileStatus.Pending;
     public double HourPrice { get; set; }
     public double TwoHourPrice { get; set; }
     public double NightPrice { get; set; }

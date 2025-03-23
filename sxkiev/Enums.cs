@@ -6,3 +6,13 @@ public enum ProfileType
     Gold = 1,
     Vip = 2
 }
+
+public enum ProfileStatus
+{
+    Pending,
+    Active,
+    Hidden,
+    Banned,
+    Expired,
+    Rejected
+}

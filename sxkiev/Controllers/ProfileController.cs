@@ -30,6 +30,14 @@ public class ProfileController : ControllerBase
         return Ok(profiles);
     }
 
+    [HttpGet("actions")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetActions([FromQuery] Guid id, [FromQuery] string action)
+    {
+        var actions = await _profileService.GetActionsAsync(id, action);
+        return Ok(actions);
+    }
+
     [HttpGet("search")]
     [AllowAnonymous]
     public async Task<IActionResult> SearchProfiles(
@@ -78,6 +86,14 @@ public class ProfileController : ControllerBase
         return Ok(profile);
     }
 
+    [HttpPost("actions")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Action([FromQuery] Guid id, [FromBody] ActionInputModel action)
+    {
+        await _profileService.AddAction(id, action);
+        return Ok();
+    }
+    
     [HttpPost]
     public async Task<IActionResult> AddProfile([FromBody] AddProfileInputModel profileInputModel)
     {
@@ -91,7 +107,6 @@ public class ProfileController : ControllerBase
             Phone = profileInputModel.Phone,
             UserId = long.Parse(userId),
             PlanId = profileInputModel.PlanId,
-            // IsPromoted = profileInputModel.IsPromoted,
             Age = profileInputModel.Age,
             Weight = profileInputModel.Weight,
             Breast = profileInputModel.Breast,
@@ -148,9 +163,9 @@ public class ProfileController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateProfile([FromBody] SxKievProfile profile)
+    public async Task<IActionResult> UpdateProfile([FromQuery] Guid id, [FromBody] UpdateProfileInputModel profile)
     {
-        await _profileService.UpdateProfileAsync(profile);
+        await _profileService.UpdateProfileAsync(id, profile);
         return NoContent();
     }
 

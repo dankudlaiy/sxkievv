@@ -8,7 +8,6 @@ namespace sxkiev.Services.Jwt;
 public class JwtService : IJwtService
 {
     private readonly string _secretKey;
-    private const int TokenLifetimeMinutes = 180;
 
     public JwtService(IConfiguration configuration)
     {
@@ -31,7 +30,7 @@ public class JwtService : IJwtService
             issuer: "auth.com",
             audience: "auth.com",
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(TokenLifetimeMinutes),
+            expires: DateTime.UtcNow.AddDays(1),
             signingCredentials: credentials
         );
 
@@ -51,7 +50,7 @@ public class JwtService : IJwtService
                 ValidateAudience = true,
                 ValidIssuer = "auth.com",
                 ValidAudience = "auth.com",
-                ValidateLifetime = true,
+                ValidateLifetime = false,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ClockSkew = TimeSpan.Zero
             };

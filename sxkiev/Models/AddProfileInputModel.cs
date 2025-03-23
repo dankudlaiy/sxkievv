@@ -20,7 +20,6 @@ public class AddProfileInputModel
     public bool Apartment { get; set; }
     public bool ToClient { get; set; }
     public int PlanId { get; set; }
-    public bool IsPromoted { get; set; }
     public int[]? Media { get; set; }
     public string[]? Districts { get; set; }
     public string[]? Favours { get; set; }

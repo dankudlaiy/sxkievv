@@ -53,4 +53,10 @@ public class Repository<T> : IRepository<T> where T : class
         _dbSet.Remove(entity);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(Expression<Func<T, bool>> predicate)
+    {
+        _dbSet.RemoveRange(_dbSet.Where(predicate));
+        await _dbContext.SaveChangesAsync();
+    }
 }

@@ -55,12 +55,12 @@ public class DailyJobHostedService : BackgroundService {
         var profileRepository = scope.ServiceProvider.GetRequiredService<IRepository<SxKievProfile>>();
         
         var profileQuery = profileRepository.Query(
-            x => x.IsActive && x.IsRejected != true && x.IsBanned != true && x.ExpirationDate < DateTime.UtcNow);
+            x => x.Status == ProfileStatus.Active && x.ExpirationDate < DateTime.UtcNow);
         var expiredProfiles = await profileQuery.ToListAsync(cancellationToken: cancellationToken);
 
         foreach (var profile in expiredProfiles)
         {
-            profile.IsActive = false;
+            profile.Status = ProfileStatus.Expired;
             await profileRepository.UpdateAsync(profile);
             
             var userRepository = scope.ServiceProvider.GetRequiredService<IRepository<SxKievUser>>();
