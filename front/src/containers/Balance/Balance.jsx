@@ -1,58 +1,70 @@
-import React, {useState} from "react"
+import React, {useEffect, useState} from "react"
 import styles from "./Balance.module.sass"
-import {plans} from "../../helpers/data"
-import {faChevronDown, faCoins, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons"
+import {faChevronDown, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import Button from "../../components/Button/Button"
-
-const topups = [
-   {amount: 59, time: '12:00'},
-   {amount: 3, time: '12:00'},
-   {amount: 109, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-   {amount: 50, time: '12:00'},
-]
-
-const withdraws = [
-   {amount: 59, time: '12:00', service: 'оплата анкеты'},
-]
 
 export default function Balance() {
    // Controls whether the table is open or closed
    const [openPlans, setOpenPlans] = useState(false)
-   const [openTopups, setTopups] = useState(false)
-   const [openWithdraws, setWithdraws] = useState(false)
+   const [openTopups, setOpenTopups] = useState(false)
+   const [openWithdraws, setOpenWithdraws] = useState(false)
+   const [curBalance, setCurBalance] = useState('---')
+   const [deposits, setDeposists] = useState('---')
+   const [withdraws, setWithdraws] = useState('---')
+
+   const [planInfo, setPlanInfo] = useState({
+      standart: ['---', '---', '---'],
+      gold    : ['---', '---', '---'],
+      vip     : ['---', '---', '---']
+   })
+
+   const fetchPlanInfo = async () => {
+      const res = await fetch("/api/Plan", {
+         method : "GET",
+         headers: {
+            'Content-Type' : 'application/json',
+            'Accept'       : 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+         },
+      })
+
+      const data = await res.json()
+
+      setPlanInfo({
+         standart: [data[0].price, data[1].price, data[2].price],
+         gold    : [data[3].price, data[4].price, data[5].price],
+         vip     : [data[6].price, data[7].price, data[8].price],
+      })
+   }
+
+   const fetchBalanceInfo = async () => {
+      const res = await fetch("/api/Plan/info", {
+         method : "GET",
+         headers: {
+            'Content-Type' : 'application/json',
+            'Accept'       : 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+         },
+      })
+
+      const data = await res.json()
+      setCurBalance(data.balance)
+      setDeposists(data.deps)
+      setWithdraws(data.payments)
+
+      console.log(data)
+   }
+
+   useEffect(() => {
+      fetchPlanInfo()
+      fetchBalanceInfo()
+   }, [])
 
    return (
       <div className={styles.container}>
 
-         <h2 style={{alignSelf: 'flex-start'}}>Текущий баланс: 20$</h2>
+         <h2 style={{alignSelf: 'flex-start'}}>Текущий баланс: {curBalance}$</h2>
 
          <div className={styles.faqItem}>
             <div className={styles.faqTitle} onClick={() => setOpenPlans(!openPlans)}>
@@ -77,25 +89,25 @@ export default function Balance() {
                            <td>
                               Стоимость <b>1 месяца</b> размещения на сайте night-kiev.com
                            </td>
-                           <td>{plans.basic.prices["1_month"]}$</td>
-                           <td>{plans.premium.prices["1_month"]}$</td>
-                           <td>{plans.vip.prices["1_month"]}$</td>
+                           <td>{planInfo.standart[0]}$</td>
+                           <td>{planInfo.gold[0]}$</td>
+                           <td>{planInfo.vip[0]}$</td>
                         </tr>
                         <tr>
                            <td>
                               Стоимость <b>2 месяцев</b> размещения на сайте night-kiev.com
                            </td>
-                           <td>{plans.basic.prices["2_month"]}$</td>
-                           <td>{plans.premium.prices["2_month"]}$</td>
-                           <td>{plans.vip.prices["2_month"]}$</td>
+                           <td>{planInfo.standart[1]}$</td>
+                           <td>{planInfo.gold[1]}$</td>
+                           <td>{planInfo.vip[1]}$</td>
                         </tr>
                         <tr>
                            <td>
                               Стоимость <b>3 месяцев</b> размещения на сайте night-kiev.com
                            </td>
-                           <td>{plans.basic.prices["3_month"]}$</td>
-                           <td>{plans.premium.prices["3_month"]}$</td>
-                           <td>{plans.vip.prices["3_month"]}$</td>
+                           <td>{planInfo.standart[2]}$</td>
+                           <td>{planInfo.gold[2]}$</td>
+                           <td>{planInfo.vip[2]}$</td>
                         </tr>
                         </tfoot>
                         <tbody>
@@ -171,17 +183,17 @@ export default function Balance() {
          </div>
 
          <div className={styles.faqItem}>
-            <div className={styles.faqTitle} onClick={() => setTopups(!openTopups)}>
+            <div className={styles.faqTitle} onClick={() => setOpenTopups(!openTopups)}>
                <span className={styles.faqTitleText}>История пополнений</span>
                <FontAwesomeIcon icon={faChevronDown}/>
             </div>
 
             {openTopups && (
                <div className={styles.historyContainer}>
-                  {topups.length === 0 ? (
+                  {deposits.length === 0 ? (
                      <p>История пополнений пуста</p>
                   ) : (
-                     topups.map((item, idx) => (
+                     deposits.map((item, idx) => (
                         <div key={idx} className={styles.historyItem}>
                            <div className={styles.historyAmount}>
                               <FontAwesomeIcon icon={faPlus} style={{marginRight: '5px', fontSize: '.9em'}}/>
@@ -198,7 +210,7 @@ export default function Balance() {
          </div>
 
          <div className={styles.faqItem}>
-            <div className={styles.faqTitle} onClick={() => setWithdraws(!openWithdraws)}>
+            <div className={styles.faqTitle} onClick={() => setOpenWithdraws(!openWithdraws)}>
                <span className={styles.faqTitleText}>История списаний</span>
                <FontAwesomeIcon icon={faChevronDown}/>
             </div>

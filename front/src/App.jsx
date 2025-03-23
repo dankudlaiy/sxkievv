@@ -9,6 +9,9 @@ import Admin from "./pages/Admin/Admin";
 import AddAnketa from "./pages/AddAnketa/AddAnketa"
 import MyAnketas from "./containers/MyAnketas/MyAnketas"
 import Balance from "./containers/Balance/Balance"
+import EditAnketa from "./pages/EditAnketa/EditAnketa"
+import ChangeTarrif from "./containers/ChangeTarrif/ChangeTarrif"
+import DeleteAnketa from "./containers/DeleteAnketa/DeleteAnketa"
 
 
 function App() {
@@ -21,8 +24,11 @@ function App() {
                <Route path="" element={<MyAnketas />} />
                <Route path="my-anketas" element={<MyAnketas />} />
                <Route path="balance" element={<Balance />} />
+               <Route path="change-tarrif/:id" element={<ChangeTarrif />} />
+               <Route path="delete-anketa/:id" element={<DeleteAnketa />} />
             </Route>
             <Route path="add-anketa" element={<AddAnketa />} />
+            <Route path="edit-anketa/:id" element={<EditAnketa />} />
             <Route path="admin" element={<Admin />} />
             <Route path="auth" element={<Auth />}  />
          </Route>

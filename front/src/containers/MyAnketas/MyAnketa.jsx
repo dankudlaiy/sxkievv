@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './AdminAnketa.module.sass';
+import styles from './MyAnketa.module.sass';
 import clsx from 'clsx';
 import Button from '../../components/Button/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,7 +8,30 @@ import {useNavigate} from "react-router-dom"
 import Hr from "../../components/Hr"
 
 
-const AdminAnketa = ({ data }) => {
+
+function getTarrifById(id) {
+   if (id === 2)
+      return 'Вип'
+
+   if (id === 1)
+      return 'Голд'
+
+   if (id === 0)
+      return 'Стандарт'
+}
+
+function getDaysLeft(expirationDateStr) {
+   const now = new Date();
+   const expirationDate = new Date(expirationDateStr);
+
+   const diffTime = expirationDate - now;
+   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+   return diffDays;
+}
+
+
+const MyAnketa = ({ data }) => {
    const navigate = useNavigate()
 
    const [isMobile, setIsMobile] = useState(false);
@@ -221,12 +244,12 @@ const AdminAnketa = ({ data }) => {
                <div className={styles.admin_data}>
                   <div className={styles.admin_data_row}>
                      <div className={styles.admin_data_title}>Пакет</div>
-                     <div className={styles.admin_data_val}>Вип</div>
+                     <div className={styles.admin_data_val}>{getTarrifById(data.type)}</div>
                   </div>
 
                   <div className={styles.admin_data_row}>
                      <div className={styles.admin_data_title}>Осталось дней</div>
-                     <div className={styles.admin_data_val}>21</div>
+                     <div className={styles.admin_data_val}>{getDaysLeft(data.expirationDate)}</div>
                   </div>
 
                   <div className={styles.admin_data_row}>
@@ -247,7 +270,7 @@ const AdminAnketa = ({ data }) => {
                      <FontAwesomeIcon icon={faEyeSlash} />
                      Скрыть
                   </Button>
-                  <Button>
+                  <Button onClick={() => navigate(`/profile/change-tarrif/${data.id}`)}>
                      <FontAwesomeIcon icon={faTurnUp} />
                      Сменить тариф
                   </Button>
@@ -259,9 +282,14 @@ const AdminAnketa = ({ data }) => {
                      <FontAwesomeIcon icon={faBullhorn} />
                      Продвигать
                   </Button>
-                  <Button>
+                  <Button onClick={() => navigate(`/edit-anketa/${data.id}`)}>
                      <FontAwesomeIcon icon={faPen} />
                      Редактировать
+                  </Button>
+
+                  <Button style={{background: 'red'}} onClick={() => navigate(`/profile/delete-anketa/${data.id}`)}>
+                     <FontAwesomeIcon icon={faPen} />
+                     Удалить
                   </Button>
                </div>
             </div>
@@ -270,4 +298,4 @@ const AdminAnketa = ({ data }) => {
    );
 };
 
-export default AdminAnketa;
+export default MyAnketa;

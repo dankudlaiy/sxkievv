@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styles from "./AnketaList.module.sass";
-import Anketa from "../Anketa/Anketa";
+import Anketa from "./Anketa";
 import Loader from "../../components/Loader/Loader";
 
 const AnketaList = () => {
    // We’ll load items in chunks of this size:
-   const PAGE_SIZE = 10;
+   const PAGE_SIZE = 5;
 
    const [profiles, setProfiles] = useState([]);
    const [loading, setLoading] = useState(false);
@@ -87,7 +87,9 @@ const AnketaList = () => {
       try {
          const finalQuery = buildQueryString();
 
+         console.log(skip)
          const response = await fetch(
+            // `/api/Profile/search?skip=${skip}&take=${PAGE_SIZE}&${finalQuery}`,
             `/api/Profile/search?skip=${skip}&take=${PAGE_SIZE}&${finalQuery}`,
             {
                method: "GET",
@@ -106,6 +108,8 @@ const AnketaList = () => {
          const newProfiles = data.profiles || [];
 
          // If skip == 0, replace; otherwise append
+         console.log(newProfiles)
+
          setProfiles((prev) =>
             skip === 0 ? newProfiles : [...prev, ...newProfiles]
          );
