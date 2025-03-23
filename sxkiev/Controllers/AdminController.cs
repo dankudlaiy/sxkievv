@@ -29,7 +29,7 @@ public class AdminController : ControllerBase
         return Ok(new { Count = users.Item1, Users = users.Item2 });
     }
 
-    [HttpGet("users/{id}")]
+    [HttpGet("users/{id:int}")]
     public async Task<IActionResult> GetUserById(int id)
     {
         var user = await _userService.GetUserByIdAsync(id);
@@ -57,7 +57,7 @@ public class AdminController : ControllerBase
         return Ok(new { Count = profiles.Item1, Profiles = profiles.Item2 });
     }
 
-    [HttpGet("profiles/{id}")]
+    [HttpGet("profiles/{id:guid}")]
     public async Task<IActionResult> GetProfileById(Guid id)
     {
         var profile = await _profileService.GetProfileAsync(id);
@@ -77,7 +77,7 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("profiles/{id}")]
+    [HttpDelete("profiles/{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
         await _profileService.DeleteProfileAsync(id);

@@ -5,6 +5,7 @@ public class ProfileResponseModel
     public Guid Id { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }
+    public required string Phone { get; set; }
     public int Age { get; set; }
     public int Height { get; set; }
     public int Breast { get; set; }

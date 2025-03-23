@@ -9,6 +9,7 @@ using sxkiev.Services.Auth;
 using sxkiev.Services.Bot;
 using sxkiev.Services.Jwt;
 using sxkiev.Services.Media;
+using sxkiev.Services.Plan;
 using sxkiev.Services.Profile;
 using sxkiev.Services.User;
 
@@ -67,6 +68,7 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBotService, BotService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
+builder.Services.AddScoped<IPlanService, PlanService>();
 
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
@@ -103,6 +105,16 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var dbContext = services.GetRequiredService<SxKievDbContext>();
+    dbContext.Database.Migrate();
+
+    await SeedData.SeedAsync(services);
+}
 
 if (app.Environment.IsDevelopment())
 {

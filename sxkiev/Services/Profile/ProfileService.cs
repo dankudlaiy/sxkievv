@@ -3,6 +3,7 @@ using sxkiev.Data;
 using sxkiev.Models;
 using sxkiev.Repositories.Generic;
 using sxkiev.Services.Media;
+using sxkiev.Services.Plan;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -14,16 +15,18 @@ public class ProfileService : IProfileService
     private readonly IRepository<SxKievProfile> _profileRepository;
     private readonly TelegramBotClient _botClient;
     private readonly IMediaService _mediaService;
+    private readonly IPlanService _planService;
     private readonly long _adminChatId;
     private readonly string _rootPath;
 
     public ProfileService(IRepository<SxKievProfile> profileRepository, IConfiguration configuration, 
         IServiceProvider serviceProvider, IRepository<SxKievUser> userRepository, 
-        IMediaService mediaService, IWebHostEnvironment webHostEnvironment)
+        IMediaService mediaService, IWebHostEnvironment webHostEnvironment, IPlanService planService)
     {
         _profileRepository = profileRepository;
         _userRepository = userRepository;
         _mediaService = mediaService;
+        _planService = planService;
         _rootPath = webHostEnvironment.WebRootPath;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
         _adminChatId = long.Parse(serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
@@ -33,7 +36,7 @@ public class ProfileService : IProfileService
     {
         var query = await _profileRepository.AsQueryable();
         query = query
-            .OrderByDescending(x => x.Type)
+            .OrderByDescending(x => x.Plan.Type)
             .ThenByDescending(x => x.CreatedAt);
         
         var count = await query.CountAsync();
@@ -58,10 +61,11 @@ public class ProfileService : IProfileService
                 Breast = x.Breast,
                 CreatedAt = x.CreatedAt,
                 Description = x.Description,
+                Phone = x.Phone,
                 Height = x.Height,
                 Id = x.Id,
                 Name = x.Name,
-                Type = x.Type,
+                Type = x.Plan.Type,
                 Weight = x.Weight,
                 HourPrice = x.HourPrice,
                 TwoHourPrice = x.TwoHourPrice,
@@ -122,7 +126,7 @@ public class ProfileService : IProfileService
         }
 
         query = query
-            .OrderByDescending(x => x.Type)
+            .OrderByDescending(x => x.Plan.Type)
             .ThenByDescending(x => x.CreatedAt);
 
         var count = await query.CountAsync();
@@ -136,10 +140,11 @@ public class ProfileService : IProfileService
                 Breast = x.Breast,
                 CreatedAt = x.CreatedAt,
                 Description = x.Description,
+                Phone = x.Phone,
                 Height = x.Height,
                 Id = x.Id,
                 Name = x.Name,
-                Type = x.Type,
+                Type = x.Plan.Type,
                 Weight = x.Weight,
                 HourPrice = x.HourPrice,
                 TwoHourPrice = x.TwoHourPrice,
@@ -162,9 +167,34 @@ public class ProfileService : IProfileService
         return responseModel;
     }
 
-    public async Task<SxKievProfile?> GetProfileAsync(Guid id)
+    public async Task<ProfileResponseModel?> GetProfileAsync(Guid id)
     {
-        return await _profileRepository.FirstOrDefaultAsync(x => x.Id == id);
+        var profile = await _profileRepository
+            .Query(x => x.Id == id)
+            .Select(x => new ProfileResponseModel
+            {
+                Age = x.Age,
+                Breast = x.Breast,
+                CreatedAt = x.CreatedAt,
+                Description = x.Description,
+                Phone = x.Phone,
+                Height = x.Height,
+                Id = x.Id,
+                Name = x.Name,
+                Type = x.Plan.Type,
+                Weight = x.Weight,
+                HourPrice = x.HourPrice,
+                TwoHourPrice = x.TwoHourPrice,
+                NightPrice = x.NightPrice,
+                Apartment = x.Apartment,
+                ToClient = x.ToClient,
+                Photos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("image")).Select(y => y.Path),
+                Videos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("video")).Select(y => y.Path),
+                Districts = x.Districts.Select(y => y.District.ToString()),
+                Favours = x.Favours.Select(y => y.Favour.ToString())
+            }).FirstOrDefaultAsync();
+        
+        return profile;
     }
 
     public async Task UpdateProfileAsync(SxKievProfile profile)
@@ -178,17 +208,26 @@ public class ProfileService : IProfileService
         
         if (user is null) throw new Exception("User not found");
 
-        var price = profile.Type switch
+        var plan = await _planService.GetProfileById(profile.PlanId);
+        
+        if (plan is null) throw new Exception("Plan not found");
+
+        if (user.Balance < plan.Price) throw new Exception("Not enough balance");
+
+        user.Balance -= plan.Price;
+
+        profile.ExpirationDate = DateTime.UtcNow.AddMonths(plan.Duration);
+
+        profile.Payments = new List<Payment>
         {
-            ProfileType.Vip => PricePolicy.Vip,
-            ProfileType.Gold => PricePolicy.Gold,
-            ProfileType.Platinum => PricePolicy.Platinum,
-            _ => PricePolicy.Basic
+            new()
+            {
+                Amount = plan.Price,
+                Date = DateTime.UtcNow,
+                ProfileId = profile.Id,
+                Description = $"Оплата анкеты {profile.Name}"
+            }
         };
-
-        if (user.Balance < price) throw new Exception("Not enough balance");
-
-        user.Balance -= price;
 
         var createdProfile = await _profileRepository.AddAsync(profile);
 
@@ -230,7 +269,7 @@ public class ProfileService : IProfileService
 
     public async Task DeleteProfileAsync(Guid id)
     {
-        var profile = await GetProfileAsync(id);
+        var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == id);
         if (profile == null) throw new Exception("Profile not found");
         await _profileRepository.DeleteAsync(profile);
     }

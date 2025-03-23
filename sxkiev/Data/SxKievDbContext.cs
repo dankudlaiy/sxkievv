@@ -14,6 +14,11 @@ public class SxKievDbContext : DbContext
     public DbSet<Dep> Deps { get; set; }
     public DbSet<Media> Medias { get; set; }
     public DbSet<ProfileMedia> ProfileMedias { get; set; }
+    public DbSet<ProfileDistrict> ProfileDistrict { get; set; }
+    public DbSet<ProfileFavour> ProfileFavour { get; set; }
+    public DbSet<ProfilePlan> ProfilePlans { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<ProfileAction> ProfileActions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

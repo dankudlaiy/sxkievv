@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using sxkiev.Services.Profile;
 using sxkiev.Data;
 using sxkiev.Models;
-using sxkiev.Services.Media;
 
 namespace sxkiev.Controllers;
 
@@ -65,7 +64,7 @@ public class ProfileController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetProfileById(Guid id)
     {
@@ -89,7 +88,10 @@ public class ProfileController : ControllerBase
         {
             Name = profileInputModel.Name,
             Description = profileInputModel.Description,
+            Phone = profileInputModel.Phone,
             UserId = long.Parse(userId),
+            PlanId = profileInputModel.PlanId,
+            // IsPromoted = profileInputModel.IsPromoted,
             Age = profileInputModel.Age,
             Weight = profileInputModel.Weight,
             Breast = profileInputModel.Breast,
@@ -99,7 +101,6 @@ public class ProfileController : ControllerBase
             NightPrice = profileInputModel.NightPrice,
             Apartment = profileInputModel.Apartment,
             ToClient = profileInputModel.ToClient,
-            Type = profileInputModel.Type,
             Media = new List<ProfileMedia>(),
             Districts = new List<ProfileDistrict>(),
             Favours = new List<ProfileFavour>()
@@ -143,7 +144,7 @@ public class ProfileController : ControllerBase
 
         await _profileService.AddProfileAsync(profile);
 
-        return Ok();
+        return Ok(profile.Id);
     }
 
     [HttpPut]
@@ -153,7 +154,7 @@ public class ProfileController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
         await _profileService.DeleteProfileAsync(id);
