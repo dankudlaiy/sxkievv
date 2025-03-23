@@ -2,8 +2,7 @@
 
 public enum ProfileType
 {
-    Basic,
-    Vip,
-    Gold,
-    Platinum
+    Basic = 0,
+    Gold = 1,
+    Vip = 2
 }

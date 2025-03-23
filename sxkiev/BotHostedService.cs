@@ -80,14 +80,14 @@ public class BotHostedService : BackgroundService
                     text: token,
                     cancellationToken: cancellationToken);
 
-                var adminMessage = $"❗ Попытка входа ❗\n" +
-                                   $"👤 Пользователь: {username} ({fullName})\n" +
-                                   $"🆔 Telegram ID: {userId}";
-
-                await botClient.SendMessage(
-                    chatId: _adminChatId,
-                    text: adminMessage,
-                    cancellationToken: cancellationToken);
+                // var adminMessage = $"❗ Попытка входа ❗\n" +
+                //                    $"👤 Пользователь: {username} ({fullName})\n" +
+                //                    $"🆔 Telegram ID: {userId}";
+                //
+                // await botClient.SendMessage(
+                //     chatId: _adminChatId,
+                //     text: adminMessage,
+                //     cancellationToken: cancellationToken);
 
                 return;
             }
@@ -273,11 +273,11 @@ public class BotHostedService : BackgroundService
                 
                 using var scope = _serviceProvider.CreateScope();
                 var botService = scope.ServiceProvider.GetRequiredService<IBotService>();
-                
-                await botService.ApproveProfile(profileId);
-                
-                await _botClient.DeleteMessage(update.CallbackQuery.Message!.Chat.Id, update.CallbackQuery.Message.Id,
-                    cancellationToken: cancellationToken);
+
+                var profile = await botService.ApproveProfile(profileId);
+
+                await _botClient.EditMessageCaption(messageId: update.CallbackQuery.Message!.Id, chatId: update.CallbackQuery.Message.Chat.Id,
+                    caption: $"Анкета '{profile.Name}' опубликована\nhttp://localhost:3000/{profile.Id}", cancellationToken: cancellationToken);
             }
             
             if (update.CallbackQuery?.Data?.StartsWith("deny_replenish_") == true)
@@ -304,20 +304,19 @@ public class BotHostedService : BackgroundService
             if (update.CallbackQuery?.Data?.StartsWith("deny_profile_") == true)
             {
                 var profileId = Guid.Parse(update.CallbackQuery.Data.Split("_")[2]);
-                
+
                 using var scope = _serviceProvider.CreateScope();
                 var botService = scope.ServiceProvider.GetRequiredService<IBotService>();
-                
-                await botService.RejectProfile(profileId);
 
-                await _botClient.DeleteMessage(update.CallbackQuery.Message!.Chat.Id, update.CallbackQuery.Message.Id,
-                    cancellationToken: cancellationToken);
+                var profile = await botService.RejectProfile(profileId);
+
+                await _botClient.EditMessageCaption(messageId: update.CallbackQuery.Message!.Id, chatId: update.CallbackQuery.Message.Chat.Id,
+                    caption: $"Анкета '{profile.Name}' отклонена\nhttp://localhost:3000/{profile.Id}", cancellationToken: cancellationToken);
             }
         }
     }
 
-    private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception,
-        CancellationToken cancellationToken)
+    private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Telegram bot error: {exception.Message}");
         return Task.CompletedTask;

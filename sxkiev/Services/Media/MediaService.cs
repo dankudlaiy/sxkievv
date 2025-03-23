@@ -49,10 +49,23 @@ public class MediaService : IMediaService
                 await file.CopyToAsync(fileStream);
             }
 
-            using (var image = await Image.LoadAsync(filePath))
+            if (file.ContentType.StartsWith("image/"))
             {
+                using var image = await Image.LoadAsync(filePath);
+
                 using var watermark = await Image.LoadAsync(Path.Combine(wwwrootFolder, "watermark.png"));
 
+                var maxWatermarkWidth = (int)(image.Width / 3.0);
+                
+                if (watermark.Width > maxWatermarkWidth)
+                {
+                    var ratio = (double)watermark.Width / watermark.Height;
+                    var newWidth = maxWatermarkWidth;
+                    var newHeight = (int)(newWidth / ratio);
+                    
+                    watermark.Mutate(ctx => ctx.Resize(newWidth, newHeight));
+                }
+                
                 var location = new Point(
                     (image.Width - watermark.Width) / 2,
                     (int)Math.Round((image.Height - watermark.Height) / 1.15f)

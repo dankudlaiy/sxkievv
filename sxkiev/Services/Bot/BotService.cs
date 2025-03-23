@@ -129,7 +129,7 @@ public class BotService : IBotService
         };
     }
 
-    public async Task ApproveProfile(Guid profileId)
+    public async Task<SxKievProfile> ApproveProfile(Guid profileId)
     {
         var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == profileId);
         
@@ -137,9 +137,11 @@ public class BotService : IBotService
 
         profile.IsActive = true;
         await _profileRepository.UpdateAsync(profile);
+
+        return profile;
     }
 
-    public async Task RejectProfile(Guid profileId)
+    public async Task<SxKievProfile> RejectProfile(Guid profileId)
     {
         var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == profileId);
         
@@ -147,5 +149,7 @@ public class BotService : IBotService
 
         profile.IsRejected = true;
         await _profileRepository.UpdateAsync(profile);
+
+        return profile;
     }
 }
