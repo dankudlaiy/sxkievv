@@ -59,6 +59,15 @@ public class BotHostedService : BackgroundService
             HandleErrorAsync,
             receiverOptions,
             stoppingToken);
+        
+        var commands = new[]
+        {
+            new BotCommand { Command = "start", Description = "Запустить бота" },
+            new BotCommand { Command = "auth", Description = "Авторизация" },
+            new BotCommand { Command = "profile", Description = "Мой профиль" },
+        };
+
+        await _botClient.SetMyCommands(commands, cancellationToken: stoppingToken);
 
         await Task.Delay(-1, stoppingToken);
     }
@@ -84,7 +93,9 @@ public class BotHostedService : BackgroundService
                     UserId = userId,
                     ChatId = update.Message.Chat.Id,
                     Username = username!,
-                    IsAdmin = isAdmin
+                    IsAdmin = isAdmin,
+                    FirstName = update.Message.From.FirstName,
+                    LastName = update.Message.From.LastName
                 });
 
                 await botClient.SendMessage(
@@ -114,7 +125,9 @@ public class BotHostedService : BackgroundService
                     UserId = userId,
                     ChatId = update.Message.Chat.Id,
                     Username = username!,
-                    IsAdmin = isAdmin
+                    IsAdmin = isAdmin,
+                    FirstName = update.Message.From.FirstName,
+                    LastName = update.Message.From.LastName
                 });
 
                 await botClient.SendMessage(

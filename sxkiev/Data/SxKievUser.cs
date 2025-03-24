@@ -9,6 +9,8 @@ public class SxKievUser
     public long ChatId { get; set; }
     [MaxLength(50)]
     public required string Username { get; set; }
+    public string FirstName { get; set; }
+    public string? LastName { get; set; }
     public bool IsAdmin { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

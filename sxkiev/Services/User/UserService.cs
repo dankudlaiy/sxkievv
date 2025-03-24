@@ -32,6 +32,8 @@ public class UserService : IUserService
                 TelegramId = x.TelegramId,
                 IsAdmin = x.IsAdmin,
                 Username = x.Username,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
                 UpdatedAt = x.UpdatedAt,
                 Deposit = x.Deps.Where(dep => dep.Amount.HasValue).Sum(dep => dep.Amount) ?? 0
             }).ToListAsync();

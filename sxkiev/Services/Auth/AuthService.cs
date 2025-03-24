@@ -28,7 +28,9 @@ public class AuthService : IAuthService
             {
                 TelegramId = inputModel.UserId,
                 ChatId = inputModel.ChatId,
-                Username = inputModel.Username
+                Username = inputModel.Username,
+                FirstName = inputModel.FirstName,
+                LastName = inputModel.LastName
             });
         }
 
