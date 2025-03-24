@@ -330,7 +330,7 @@ public class BotHostedService : BackgroundService
                 var profile = await botService.ApproveProfile(profileId);
 
                 await _botClient.EditMessageCaption(messageId: update.CallbackQuery.Message!.Id, chatId: update.CallbackQuery.Message.Chat.Id,
-                    caption: $"Анкета '{profile.Name}' опубликована\nhttp://localhost:3000/{profile.Id}", cancellationToken: cancellationToken);
+                    caption: $"Анкета '{profile.Name}' опубликована\nhttps://night-kiev.site/{profile.Id}", cancellationToken: cancellationToken);
             }
             
             if (update.CallbackQuery?.Data?.StartsWith("deny_replenish_") == true)
@@ -364,7 +364,7 @@ public class BotHostedService : BackgroundService
                 var profile = await botService.RejectProfile(profileId);
 
                 await _botClient.EditMessageCaption(messageId: update.CallbackQuery.Message!.Id, chatId: update.CallbackQuery.Message.Chat.Id,
-                    caption: $"Анкета '{profile.Name}' отклонена\nhttp://localhost:3000/{profile.Id}", cancellationToken: cancellationToken);
+                    caption: $"Анкета '{profile.Name}' отклонена\nhttps://night-kiev.site/{profile.Id}", cancellationToken: cancellationToken);
             }
         }
     }

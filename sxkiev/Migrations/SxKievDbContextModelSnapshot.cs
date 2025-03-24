@@ -357,7 +357,7 @@ namespace sxkiev.Migrations
                     b.Property<long>("TelegramId")
                         .HasColumnType("bigint");
 
-                    b.Property<double>("Data")
+                    b.Property<double>("Balance")
                         .HasColumnType("double precision");
 
                     b.Property<long>("ChatId")

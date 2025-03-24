@@ -13,16 +13,47 @@ namespace sxkiev.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ProfilePlans",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<int>(type: "integer", nullable: false),
+                    Duration = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfilePlans", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SiteOptions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SupportUrl = table.Column<string>(type: "text", nullable: false),
+                    TgBotUrl = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SiteOptions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     TelegramId = table.Column<long>(type: "bigint", nullable: false),
                     ChatId = table.Column<long>(type: "bigint", nullable: false),
                     Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: true),
                     IsAdmin = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Data = table.Column<double>(type: "double precision", nullable: false)
+                    Balance = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -104,6 +135,7 @@ namespace sxkiev.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Description = table.Column<string>(type: "character varying(1500)", maxLength: 1500, nullable: false),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     Age = table.Column<int>(type: "integer", nullable: false),
                     Height = table.Column<int>(type: "integer", nullable: false),
                     Breast = table.Column<int>(type: "integer", nullable: false),
@@ -111,20 +143,112 @@ namespace sxkiev.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    IsRejected = table.Column<bool>(type: "boolean", nullable: false),
-                    IsBanned = table.Column<bool>(type: "boolean", nullable: false),
-                    Priority = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    HourPrice = table.Column<double>(type: "double precision", nullable: false),
+                    TwoHourPrice = table.Column<double>(type: "double precision", nullable: false),
+                    NightPrice = table.Column<double>(type: "double precision", nullable: false),
+                    Apartment = table.Column<bool>(type: "boolean", nullable: false),
+                    ToClient = table.Column<bool>(type: "boolean", nullable: false),
+                    PlanId = table.Column<int>(type: "integer", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Profiles", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Profiles_ProfilePlans_PlanId",
+                        column: x => x.PlanId,
+                        principalTable: "ProfilePlans",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Profiles_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "TelegramId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Amount = table.Column<double>(type: "double precision", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    ProfileId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProfileActions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Action = table.Column<string>(type: "text", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ProfileId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfileActions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProfileActions_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProfileDistrict",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    District = table.Column<string>(type: "text", nullable: false),
+                    ProfileId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfileDistrict", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProfileDistrict_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProfileFavour",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Favour = table.Column<string>(type: "text", nullable: false),
+                    ProfileId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfileFavour", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProfileFavour_Profiles_ProfileId",
+                        column: x => x.ProfileId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -170,6 +294,26 @@ namespace sxkiev.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Payments_ProfileId",
+                table: "Payments",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProfileActions_ProfileId",
+                table: "ProfileActions",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProfileDistrict_ProfileId",
+                table: "ProfileDistrict",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProfileFavour_ProfileId",
+                table: "ProfileFavour",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProfileMedias_MediaId",
                 table: "ProfileMedias",
                 column: "MediaId");
@@ -178,6 +322,11 @@ namespace sxkiev.Migrations
                 name: "IX_ProfileMedias_ProfileId",
                 table: "ProfileMedias",
                 column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Profiles_PlanId",
+                table: "Profiles",
+                column: "PlanId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Profiles_UserId",
@@ -195,13 +344,31 @@ namespace sxkiev.Migrations
                 name: "Deps");
 
             migrationBuilder.DropTable(
+                name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "ProfileActions");
+
+            migrationBuilder.DropTable(
+                name: "ProfileDistrict");
+
+            migrationBuilder.DropTable(
+                name: "ProfileFavour");
+
+            migrationBuilder.DropTable(
                 name: "ProfileMedias");
+
+            migrationBuilder.DropTable(
+                name: "SiteOptions");
 
             migrationBuilder.DropTable(
                 name: "Medias");
 
             migrationBuilder.DropTable(
                 name: "Profiles");
+
+            migrationBuilder.DropTable(
+                name: "ProfilePlans");
 
             migrationBuilder.DropTable(
                 name: "Users");

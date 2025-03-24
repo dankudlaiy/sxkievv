@@ -56,7 +56,7 @@ public class AuthService : IAuthService
 
         var str = guid.ToString();
         
-        var href = "http://localhost:3000/auth?token=" + str;
+        var href = "https://night-kiev.site/auth?token=" + str;
         
         return href;
     }

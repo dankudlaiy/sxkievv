@@ -14,7 +14,7 @@ public class SxKievUser
     public bool IsAdmin { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public double Data { get; set; }
+    public double Balance { get; set; }
     [InverseProperty(nameof(SxKievProfile.User))]
     public virtual ICollection<SxKievProfile> Profiles { get; set; }
     [InverseProperty(nameof(BotToken.User))]

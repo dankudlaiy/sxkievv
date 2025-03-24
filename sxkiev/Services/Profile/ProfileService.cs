@@ -485,7 +485,7 @@ public class ProfileService : IProfileService
         var filePath = Path.Combine(_rootPath, relativePath);
         await using var stream = File.OpenRead(filePath);
         await _botClient.SendPhoto(chatId:_adminChatId, photo: new InputFileStream(stream),
-            caption: $"Новая анкета: {profile.Name}\nhttp://localhost:3000/{profile.Id}", replyMarkup: adminKeyboard);
+            caption: $"Новая анкета: {profile.Name}\nhttps://night-kiev.site/{profile.Id}", replyMarkup: adminKeyboard);
 
         return createdProfile;
     }

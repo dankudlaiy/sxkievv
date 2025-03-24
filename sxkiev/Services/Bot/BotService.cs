@@ -26,7 +26,7 @@ public class BotService : IBotService
         return new UserProfileResponseModel
         {
             Username = user.Username,
-            Data = user.Data
+            Balance = user.Balance
         };
     }
 
@@ -88,7 +88,7 @@ public class BotService : IBotService
         
         if (user is null) throw new Exception("User not found");
         
-        user.Data += dep.Amount!.Value;
+        user.Balance += dep.Amount!.Value;
         await _userRepository.UpdateAsync(user);
         
         return new AddDetailsResponseModel

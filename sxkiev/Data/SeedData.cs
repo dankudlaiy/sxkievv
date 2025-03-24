@@ -73,10 +73,52 @@ public class SeedData
         {
             dbContext.SiteOptions.Add(new SiteOptions
             {
-                SupportUrl = "https://t.me/sxkiev",
-                TgBotUrl = "https://t.me/sxkiev_bot"
+                SupportUrl = "https://t.me/saul_gooddman",
+                TgBotUrl = "https://t.me/night_kiev_bot"
             });
             
+            await dbContext.SaveChangesAsync();
+        }
+
+        if (!dbContext.Users.Any())
+        {
+            dbContext.Users.AddRange(new List<SxKievUser>
+            {
+                new() {
+                    Balance = 10000,
+                    ChatId = 923140210,
+                    TelegramId = 923140210,
+                    Username = "duralllk",
+                    IsAdmin = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    FirstName = "llkdllklllkd",
+                    LastName = "llkdllklllkd"
+                },
+                new() {
+                    Balance = 10000,
+                    ChatId = 770120368,
+                    TelegramId = 770120368,
+                    Username = "dzemych",
+                    IsAdmin = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    FirstName = "dzemych",
+                    LastName = "ivvv"
+                },
+                new() {
+                    Balance = 10000,
+                    ChatId = 6514493997,
+                    TelegramId = 6514493997,
+                    Username = "Mr_Nazar7",
+                    IsAdmin = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    FirstName = "agent",
+                    LastName = "nazar"
+                },
+            });
+
             await dbContext.SaveChangesAsync();
         }
     }

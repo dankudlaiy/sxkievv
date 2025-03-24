@@ -12,8 +12,8 @@ using sxkiev.Data;
 namespace sxkiev.Migrations
 {
     [DbContext(typeof(SxKievDbContext))]
-    [Migration("20250324042044_add first name")]
-    partial class addfirstname
+    [Migration("20250324083618_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

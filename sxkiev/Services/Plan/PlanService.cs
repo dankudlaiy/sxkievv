@@ -80,7 +80,7 @@ public class PlanService : IPlanService
 
         return new CurrentUserInfoResponseModel
         {
-            Data = user.Data,
+            Data = user.Balance,
             Deps = depsResponse,
             Payments = paymentsResponse
         };
