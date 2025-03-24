@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import styles from './MyAnketa.module.sass'
+import styles from './UserAnketa.module.sass'
 import clsx from 'clsx'
 import Button from '../../components/Button/Button'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
@@ -9,7 +9,6 @@ import Hr from "../../components/Hr"
 import {Status, status_names, support_url} from "../../helpers/data"
 import Loader from "../../components/Loader/Loader"
 import {getDaysLeft} from "../../helpers/helpers"
-import {UserContext} from "../../context/Context"
 
 
 function getTarrifById(id) {
@@ -24,7 +23,7 @@ function getTarrifById(id) {
 }
 
 
-const MyAnketa = ({data}) => {
+const UserAnketa = ({data}) => {
    const navigate = useNavigate()
 
    const [status, setStatus] = useState(status_names[data.status])
@@ -356,4 +355,4 @@ const MyAnketa = ({data}) => {
    )
 }
 
-export default MyAnketa
+export default UserAnketa

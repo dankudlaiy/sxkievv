@@ -52,8 +52,6 @@ export default function Balance() {
       setCurBalance(data.balance)
       setDeposists(data.deps)
       setWithdraws(data.payments)
-
-      console.log(data)
    }
 
    useEffect(() => {

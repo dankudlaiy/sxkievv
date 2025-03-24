@@ -44,9 +44,10 @@ const ChangeTarrif = () => {
          const res = await fetch(`/api/Profile/${id}`, {
             method: "GET",
             headers: {
-               "Content-Type": "application/json",
-               Accept: "application/json",
-            },
+               'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+            }
          });
 
          if (res.status === 404) {
@@ -59,7 +60,6 @@ const ChangeTarrif = () => {
          }
 
          const data = await res.json();
-         console.log(data)
 
          setTarrif(getTarrifById(data.type));
       } catch (err) {

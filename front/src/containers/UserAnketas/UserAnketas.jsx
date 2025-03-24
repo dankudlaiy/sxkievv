@@ -1,10 +1,12 @@
-import styles from './MyAnketas.module.sass'
+import styles from './UserAnketas.module.sass'
 import React, {useContext, useEffect, useState} from "react"
-import {useSearchParams} from "react-router-dom"
-import MyAnketa from "./MyAnketa"
+import {useParams, useSearchParams} from "react-router-dom"
+import UserAnketa from "./UserAnketa"
 import {UserContext} from "../../context/Context"
 
-const MyAnketas = () => {
+const UserAnketas = () => {
+   const { user_id } = useParams()
+
    const [profiles, setProfiles] = useState([])
    const [loading, setLoading] = useState(false)
    const [error, setError] = useState(null)
@@ -15,17 +17,14 @@ const MyAnketas = () => {
       setLoading(true)
 
       try {
-         const response = await fetch(
-            `/api/Profile?take=10&skip=0`,
-            {
-               method: "GET",
-               headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                  "Content-Type": "*/*",
-                  Accept: "*/*",
-               },
+         const response =await fetch(`/api/Admin/profiles?skip=0&take=10&userId=${user_id}`, {
+            method: "GET",
+            headers: {
+               'Content-Type': 'application/json',
+               'Accept': 'application/json',
+               'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
             }
-         );
+         })
 
          const res_data = await response.json()
 
@@ -52,7 +51,7 @@ const MyAnketas = () => {
       <div className={styles.container}>
          <div className={styles.wrapper}>
             {profiles.map((profile) => (
-               <MyAnketa key={profile.id} data={profile}/>
+               <UserAnketa key={profile.id} data={profile}/>
             ))}
             {!loading && (
                <div className={styles.loadMoreContainer}>
@@ -67,4 +66,4 @@ const MyAnketas = () => {
    )
 }
 
-export default MyAnketas
+export default UserAnketas

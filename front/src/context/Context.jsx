@@ -2,25 +2,60 @@ import {createContext, useState, useEffect} from "react"
 
 export const UserContext = createContext(null)
 
-const UserProvider = ({children}) => {
-   const [user, setUser] = useState(null) // null = not logged in
+export default function UserProvider({children}) {
+   const [user, setUser] = useState(null)
 
+   // On mount: check localStorage for token, fetch role
    useEffect(() => {
-      const storedUser = localStorage.getItem("user")
+      (async () => {
+         const token = localStorage.getItem("authToken")
+         if (!token) return
 
-      if (storedUser)
-         setUser(JSON.parse(storedUser)) // Restore user from localStorage
+         try {
+            const res = await fetch("/api/Auth/role", {
+               method : "GET",
+               headers: {
+                  "Content-Type" : "application/json",
+                  "Authorization": `Bearer ${token}`,
+               },
+            })
+            if (!res.ok) throw new Error("Failed fetching role")
+
+            const data = await res.json()
+            // Suppose 'role' is returned: { role: "admin" } or "user"
+            setUser({token, role: data.role})
+         } catch (err) {
+            setUser(null)
+         }
+      })()
    }, [])
 
-   const login = (userData) => {
-      setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData)) // Store in localStorage
-      window.location.reload()
+   // login: store token, fetch role, setUser
+   async function login(token) {
+      localStorage.setItem("authToken", token)
+      try {
+         const res = await fetch("/api/Auth/role", {
+            method : "GET",
+            headers: {
+               "Content-Type" : "application/json",
+               "Authorization": `Bearer ${token}`,
+            },
+         })
+         if (!res.ok) throw new Error("Failed role check")
+
+         const data = await res.json()
+         setUser({token, role: data.role})
+      } catch (err) {
+         setUser(null)
+      }
    }
 
-   const logout = () => {
+   // logout: remove token, clear user
+   function logout() {
+      localStorage.removeItem("authToken")
       setUser(null)
-      localStorage.removeItem("user")
+
+      window.location.href = '/'
    }
 
    return (
@@ -29,5 +64,3 @@ const UserProvider = ({children}) => {
       </UserContext.Provider>
    )
 }
-
-export default UserProvider

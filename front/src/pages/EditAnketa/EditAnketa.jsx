@@ -5,9 +5,9 @@ import Hr from "../../components/Hr";
 import { kievNeighborhoodsAndMetros, plans, servicesList } from "../../helpers/data";
 import Button from "../../components/Button/Button";
 import Loader from "../../components/Loader/Loader";
-import { faList } from "@fortawesome/free-solid-svg-icons";
+import {faArrowLeft, faList} from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { NavLink, useParams } from "react-router-dom";
+import {NavLink, useNavigate, useParams} from "react-router-dom"
 
 function getPackageType(packageName, term) {
    let x_package = 1;
@@ -26,6 +26,7 @@ function getPackageType(packageName, term) {
 
 const EditAnketa = () => {
    const { id } = useParams();
+   const navigate = useNavigate();
 
    const [values, setValues] = useState({
       name: "",
@@ -374,6 +375,11 @@ const EditAnketa = () => {
    return (
       <div className={styles.container}>
          <div className={styles.wrapper}>
+            <Button style={{marginLeft: '60px', scale: '1.2', marginBottom: '15px', textAlign: 'center', alignSelf: 'flex-start'}} onClick={() => navigate(-1)} >
+               <FontAwesomeIcon icon={faArrowLeft}/>
+               Назад
+            </Button>
+
             <h1>Введите данные анкеты</h1>
 
             <form id="submit-form" onSubmit={submitHandler} className={styles.form}>

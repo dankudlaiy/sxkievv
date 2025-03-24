@@ -1,9 +1,16 @@
 import styles from './Button.module.sass'
 import clsx from "clsx"
 
-const Button = ({children, style={}, type, submit=false, ...props}) => {
+const Button = ({children, disabled=false, style={}, type, submit=false, ...props}) => {
    return (
-      <button type={'submit' ? submit : 'button'} onClick={props.onClick} className={clsx(styles.container, styles[type])} style={style} {...props}>
+      <button
+         disabled={disabled}
+         type={'submit' ? submit : 'button'}
+         onClick={props.onClick}
+         className={clsx(styles.container, styles[type], { [styles.disabled]: disabled })}
+         style={style}
+         {...props}
+      >
          {children}
       </button>
    )
