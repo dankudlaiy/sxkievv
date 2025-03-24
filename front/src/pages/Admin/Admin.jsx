@@ -1,41 +1,48 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import styles from './Admin.module.sass'
+import {UserContext} from "../../context/Context"
 
 const Admin = () => {
-   const [isAuth, setIsAuth] = useState(false)
-   const [isAdmin, setIsAdmin] = useState(false)
+   // const [isAuth, setIsAuth] = useState(false)
+   // const [isAdmin, setIsAdmin] = useState(false)
+   const { user } = useContext(UserContext);
+
+   // For admin check, see user?.role === "admin"
+   const isAdmin = user?.role === "admin";
+   const isAuth = !!user;
+
    const [activeTab, setActiveTab] = useState('users')
    const [users, setUsers] = useState([])
    const [profiles, setProfiles] = useState([])
    const [loading, setLoading] = useState(false)
    const [error, setError] = useState(null)
 
-   useEffect(() => {
-      const token = localStorage.getItem('authToken')
-      if (token) {
-         setIsAuth(true)
-
-         fetch(`/api/Auth/role`, {
-            method : "GET",
-            headers: {
-               "Content-Type" : "*/*",
-               "Accept"       : "*/*",
-               "Authorization": `Bearer ${token}`
-            },
-         }).then(response => {
-            if (response.status === 200) {
-               console.log(response)
-               response.json().then(data => {
-                  if (data.role === 'admin') {
-                     setIsAdmin(true)
-                  }
-               })
-            }
-         })
-      } else {
-         setIsAuth(false)
-      }
-   }, [])
+   // useEffect(() => {
+   //    const token = localStorage.getItem('authToken')
+   //    if (token) {
+   //       setIsAuth(true)
+   //
+   //       fetch(`/api/Auth/role`, {
+   //          method : "GET",
+   //          headers: {
+   //             "Content-Type" : "*/*",
+   //             "Accept"       : "*/*",
+   //             "Authorization": `Bearer ${token}`
+   //          },
+   //       }).then(response => {
+   //          if (response.status === 200) {
+   //             console.log(response)
+   //             response.json().then(data => {
+   //                if (data.role === 'admin') {
+   //                   setIsAdmin(true)
+   //                }
+   //             })
+   //          }
+   //       })
+   //    } else {
+   //       setIsAuth(false)
+   //    }
+   // }, [])
 
    useEffect(() => {
       if (activeTab === 'users') {

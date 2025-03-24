@@ -1,12 +1,12 @@
 import {useEffect, useState} from "react"
 import styles from "./Home/Home.module.sass"
-import {useNavigate} from "react-router-dom"
 
 
 const Auth = () => {
    // const [profiles, setProfiles] = useState([])
    const [loading, setLoading] = useState(true)
    const [error, setError] = useState(null)
+
 
    useEffect(() => {
       const auth = async () => {

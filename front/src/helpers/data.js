@@ -1,6 +1,27 @@
 export const login_url = 'https://t.me/sxkiev_bot'
 export const support_url = 'https://t.me/saul_gooddman'
 
+
+
+export const Status = {
+   Pending: 0,
+   Active: 1,
+   Hidden: 2,
+   Banned: 3,
+   Expired: 4,
+   Rejected: 5,
+}
+
+export const status_names = [
+   "Pending",
+   "Active",
+   "Hidden",
+   "Banned",
+   "Expired",
+   "Rejected"
+]
+
+
 export const kievNeighborhoodsAndMetros = [
    "Правый берег",
    "Левый берег",

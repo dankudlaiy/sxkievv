@@ -1,15 +1,15 @@
 import styles from './UserProfile.module.sass'
 import {NavLink, Outlet} from "react-router-dom"
 import Button from "../../components/Button/Button"
-import {faCoins, faList, faRightFromBracket} from "@fortawesome/free-solid-svg-icons"
+import {faCoins, faDatabase, faList, faRightFromBracket, faUser} from "@fortawesome/free-solid-svg-icons"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import React from "react"
+import React, {useContext} from "react"
+import {UserContext} from "../../context/Context"
 
 const UserProfile = () => {
-   const logout = () => {
-      localStorage.removeItem('authToken')
-      window.location.href = '/'
-   }
+   const {user, logout} = useContext(UserContext)
+
+   const isAdmin = user?.role === "admin"
 
    return (
       <div className={styles.container}>
@@ -30,6 +30,24 @@ const UserProfile = () => {
                      Баланс
                   </Button>
                </NavLink>
+
+               {isAdmin && (
+                  <NavLink to="/profile/users">
+                     <Button type="trans" style={{color: '#333', margin: 0}}>
+                        <FontAwesomeIcon icon={faUser}/>
+                        Пользователи
+                     </Button>
+                  </NavLink>
+               )}
+
+               {isAdmin && (
+                  <NavLink to="/profile/balance">
+                     <Button type="trans" style={{color: '#333', margin: 0}}>
+                        <FontAwesomeIcon icon={faDatabase}/>
+                        Общие данные
+                     </Button>
+                  </NavLink>
+               )}
 
                <Button
                   type="trans"

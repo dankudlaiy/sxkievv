@@ -12,6 +12,9 @@ import Balance from "./containers/Balance/Balance"
 import EditAnketa from "./pages/EditAnketa/EditAnketa"
 import ChangeTarrif from "./containers/ChangeTarrif/ChangeTarrif"
 import DeleteAnketa from "./containers/DeleteAnketa/DeleteAnketa"
+import ProlongTarrif from "./containers/ProlongTarrif/ProlongTarrif"
+import Users from "./containers/Users/Users"
+import UserAnketas from "./containers/UserAnketas/UserAnketas"
 
 
 function App() {
@@ -26,6 +29,9 @@ function App() {
                <Route path="balance" element={<Balance />} />
                <Route path="change-tarrif/:id" element={<ChangeTarrif />} />
                <Route path="delete-anketa/:id" element={<DeleteAnketa />} />
+               <Route path="prolong/:id" element={<ProlongTarrif />} />
+               <Route path="users" element={<Users />} />
+               <Route path="anketas/:user_id" element={<UserAnketas />} />
             </Route>
             <Route path="add-anketa" element={<AddAnketa />} />
             <Route path="edit-anketa/:id" element={<EditAnketa />} />

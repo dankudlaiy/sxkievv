@@ -54,3 +54,13 @@ export function buildAgeStringFromParams({ minAge, maxAge }) {
    if (minAge && maxAge) return `${minAge}-${maxAge}`;
    return "";
 }
+
+export function getDaysLeft(expirationDateStr) {
+   const now = new Date()
+   const expirationDate = new Date(expirationDateStr)
+
+   const diffTime = expirationDate - now
+   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+   return diffDays
+}
