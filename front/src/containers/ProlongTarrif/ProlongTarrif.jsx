@@ -1,5 +1,5 @@
 import styles from "./ProlongTarrif.module.sass";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react"
 import AnketaPackageSelector from "../../pages/AddAnketa/PackageSelector";
 import Button from "../../components/Button/Button";
 import {NavLink, useNavigate, useParams} from "react-router-dom";
@@ -7,6 +7,7 @@ import Loader from "../../components/Loader/Loader";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowLeft, faList} from "@fortawesome/free-solid-svg-icons";
 import {getDaysLeft} from "../../helpers/helpers";
+import {UserContext} from "../../context/Context"
 
 function getTarrifById(id) {
    if (id === 2) return 'Вип';
@@ -18,6 +19,8 @@ function getTarrifById(id) {
 const ProlongTarrif = () => {
    const { id } = useParams();
    const navigate = useNavigate();
+
+   const {trans} = useContext(UserContext)
 
    const [tarrif, setTarrif] = useState();
    const [daysLeft, setDaysLeft] = useState();
@@ -140,7 +143,7 @@ const ProlongTarrif = () => {
       }, 1500);
    };
 
-   if (error) return <p>Ошибка: {error}</p>;
+   if (error) return <p>{trans.prolongTarrif.error} {error}</p>;
 
    if (loading) {
       return (
@@ -153,34 +156,36 @@ const ProlongTarrif = () => {
    if (success) {
       return (
          <div className={styles.container} style={{ padding: "30px 0" }}>
-            <h1 style={{margin: '0 auto', textAlign: 'center'}}>Тариф успешно продлен</h1>
+            <h1 style={{margin: '0 auto', textAlign: 'center'}}>
+               {trans.prolongTarrif.successTitle}
+            </h1>
 
             <NavLink to="/profile/my-anketas">
                <Button style={{margin: '20px auto 0', textAlign: 'center'}}>
                   <FontAwesomeIcon icon={faList}/>
-                  Мои анкеты
+                  {trans.prolongTarrif.myAnketas}
                </Button>
             </NavLink>
          </div>
       );
    }
 
-   // Calculate cost
+// Calculate cost
    const costToPay = getPlanCost(tarrif, addDays);
 
    return (
       <div className={styles.container}>
          <Button onClick={() => navigate(-1)} style={{marginLeft: '20px'}}>
             <FontAwesomeIcon icon={faArrowLeft}/>
-            Назад
+            {trans.prolongTarrif.back}
          </Button>
 
-         <h2>Текущий баланс: {curBalance}$</h2>
+         <h2>{trans.prolongTarrif.currentBalance}: {curBalance}$</h2>
 
-         <h2>Осталось дней: {daysLeft}</h2>
+         <h2>{trans.prolongTarrif.daysLeft}: {daysLeft}</h2>
 
          <h1 style={{textAlign: 'center', margin: '20px 0'}}>
-            Выберете насколько хотите продлить тариф
+            {trans.prolongTarrif.selectDuration}
          </h1>
 
          <AnketaPackageSelector
@@ -194,7 +199,7 @@ const ProlongTarrif = () => {
 
          {/* Show the cost to pay */}
          <h2 style={{marginBottom: '10px' }}>
-            К оплате: {costToPay}$
+            {trans.prolongTarrif.payAmount}: {costToPay}$
          </h2>
 
          <Button
@@ -203,10 +208,11 @@ const ProlongTarrif = () => {
             onClick={submitHandler}
             disabled={!addDays}
          >
-            Продлить
+            {trans.prolongTarrif.prolong}
          </Button>
       </div>
    );
+
 };
 
 export default ProlongTarrif;

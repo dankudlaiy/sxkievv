@@ -1,35 +1,14 @@
-import styles from "./ChangeTarrif.module.sass";
+import styles from "./ChangeBalance.module.sass";
 import React, {useContext, useEffect, useState} from "react"
-import AnketaPackageSelector from "../../pages/AddAnketa/PackageSelector"
 import Button from "../../components/Button/Button"
 import {NavLink, useNavigate, useParams} from "react-router-dom"
 import Loader from "../../components/Loader/Loader"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import {faArrowLeft, faList} from "@fortawesome/free-solid-svg-icons"
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons"
 import {UserContext} from "../../context/Context"
 
 
-
-function getTarrifById(id) {
-   if (id === 2)
-      return 'Вип'
-
-   if (id === 1)
-      return 'Голд'
-
-   if (id === 0)
-      return 'Стандарт'
-}
-
-function mapTarrif(tarrif) {
-   if (tarrif === "Стандарт") return 1
-   if (tarrif === "Голд") return 4
-   if (tarrif === "Вип") return 7
-   return 1
-}
-
-
-const ChangeTarrif = () => {
+const ChangeBalance = () => {
 
    const {trans} = useContext(UserContext)
 
@@ -44,7 +23,7 @@ const ChangeTarrif = () => {
 
    const fetchAnketa = async () => {
       try {
-         const res = await fetch(`/api/Profile/${id}`, {
+         const res = await fetch(`/api/Admin/users/${id}`, {
             method: "GET",
             headers: {
                'Content-Type': 'application/json',
@@ -64,7 +43,7 @@ const ChangeTarrif = () => {
 
          const data = await res.json();
 
-         setTarrif(getTarrifById(data.type));
+         setTarrif(data.balance);
       } catch (err) {
          setError(err.message);
       } finally {
@@ -79,11 +58,9 @@ const ChangeTarrif = () => {
 
    const submitHandler = async (e) => {
       e.preventDefault()
-      const tarrif_id = mapTarrif(tarrif)
-
       setLoading(true)
 
-      const res = await fetch("/api/Profile?id=" + id, {
+      const res = await fetch(`/api/Admin/users?id=${id}`, {
          method: "PUT",
          headers: {
             'Content-Type': 'application/json',
@@ -91,7 +68,7 @@ const ChangeTarrif = () => {
             'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
          },
          body: JSON.stringify({
-            planId: tarrif_id,
+            balance: tarrif,
          })
       })
 
@@ -104,7 +81,7 @@ const ChangeTarrif = () => {
       }
    }
 
-   if (error) return <p>{trans.changeTarrif.error}: {error}</p>;
+   if (error) return <p>Ошибка: {error}</p>
 
    if (loading) {
       return (
@@ -117,12 +94,12 @@ const ChangeTarrif = () => {
    if (success) {
       return (
          <div className={styles.container} style={{ padding: "30px 0" }}>
-            <h1 style={{margin: '0 auto', textAlign: 'center'}}>{trans.changeTarrif.success}</h1>
+            <h1 style={{margin: '0 auto', textAlign: 'center'}}>{trans.changeBalance.success}</h1>
 
             <NavLink to="/profile/my-anketas">
-               <Button style={{margin: '20px auto 0', textAlign: 'center'}}>
-                  <FontAwesomeIcon icon={faList}/>
-                  {trans.changeTarrif.myProfiles}
+               <Button onClick={() => navigate(-1)} style={{margin: '20px auto 0', textAlign: 'center'}}>
+                  <FontAwesomeIcon icon={faArrowLeft}/>
+                  {trans.changeBalance.back}
                </Button>
             </NavLink>
          </div>
@@ -131,34 +108,44 @@ const ChangeTarrif = () => {
 
    return (
       <div className={styles.container}>
-         <Button onClick={() => navigate(-1)} style={{marginLeft: '20px'}}>
-            <FontAwesomeIcon icon={faArrowLeft}/>
-            {trans.changeTarrif.back}
-         </Button>
+         <NavLink to="/profile/my-anketas">
+            <Button onClick={() => navigate(-1)} style={{margin: '20px auto 0', textAlign: 'center'}}>
+               <FontAwesomeIcon icon={faArrowLeft}/>
+               {trans.changeBalance.back}
+            </Button>
+         </NavLink>
 
-         <h1 style={{textAlign: 'center', margin: '20px 0'}}>
-            {trans.changeTarrif.select}
-         </h1>
+         <h1 style={{textAlign: 'center', margin: '20px 0'}}>{trans.changeBalance.enter}</h1>
 
-         <AnketaPackageSelector
-            title=""
-            packages={['Стандарт', "Голд", "Вип"]}
+         <input
+            required={true}
+            type="text"
+            style={{
+               margin: '0 auto',
+               width: '50%',
+               display: 'block',
+               alignSelf: 'center',
+               fontSize: '1.3rem',
+               textAlign: 'center',
+               border: '1px solid gray',
+               padding: '8px',
+               borderRadius: '8px',
+               outline: 'none'
+            }}
             value={tarrif}
-            changeState={setTarrif}
-            error=''
-            name='package'
+            onChange={e => setTarrif(e.target.value)}
          />
 
          <Button
             type={'submit-noshine'}
-            style={{margin: '0 auto', textAlign: 'center'}}
+            style={{margin: '30px auto 0', textAlign: 'center'}}
             onClick={submitHandler}
          >
-            {trans.changeTarrif.update}
+            {trans.changeBalance.update}
          </Button>
       </div>
    );
 
 };
 
-export default ChangeTarrif;
+export default ChangeBalance;

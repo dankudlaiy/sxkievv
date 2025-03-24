@@ -22,7 +22,7 @@ namespace sxkiev.Migrations
                     IsAdmin = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Balance = table.Column<double>(type: "double precision", nullable: false)
+                    Data = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {

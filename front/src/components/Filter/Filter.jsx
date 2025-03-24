@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from "react"
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./Filter.module.sass";
 
@@ -25,10 +25,14 @@ import {
    buildPriceStringFromParams,
    buildAgeStringFromParams,
    // ...similar "build" functions for weight/height if you wish
-} from "../../helpers/helpers.js"; // <-- place them wherever you like
+} from "../../helpers/helpers.js";
+import {filter_text} from "../../helpers/text"
+import {UserContext} from "../../context/Context" // <-- place them wherever you like
 
 
 const Filter = () => {
+   const {trans} = useContext(UserContext)
+
    const navigate = useNavigate();
    const location = useLocation();
 
@@ -223,57 +227,58 @@ const Filter = () => {
    return (
       <div className={styles.container}>
          <Select
-            title="Цена за час"
-            options={price_options}
+            // title={filter_text.hourPrice}
+            title={trans.price_title}
+            options={trans.price_options}
             value={filters.price}
             changeState={(val) => updateFilterField("price", val)}
          />
          <Select
-            title="Возраст"
-            options={age_options}
+            title={trans.age_title}
+            options={trans.age_options}
             value={filters.age}
             changeState={(val) => updateFilterField("age", val)}
          />
          <Select
-            title="Вес"
-            options={weight_options}
+            title={trans.weight_title}
+            options={trans.weight_options}
             value={filters.weight}
             changeState={(val) => updateFilterField("weight", val)}
          />
          <Select
-            title="Рост"
-            options={height_options}
+            title={trans.height_title}
+            options={trans.height_options}
             value={filters.height}
             changeState={(val) => updateFilterField("height", val)}
          />
          <Select
-            title="Размер груди"
+            title={trans.bust_title}
             options={bust_size_options}
             value={filters.bustSize}
             changeState={(val) => updateFilterField("bustSize", val)}
          />
          <Select
-            title="Принимает"
-            options={accepts_options}
+            title={trans.accepts_title}
+            options={trans.accepts_options}
             value={filters.accepts}
             changeState={(val) => updateFilterField("accepts", val)}
          />
          <Select
-            title="Район и Метро"
-            options={district_metro_options}
+            title={trans.district_title}
+            options={trans.district_options}
             value={filters.districtMetro}
             changeState={(val) => updateFilterField("districtMetro", val)}
          />
          <Select
-            title="Услуги"
-            options={services_options}
+            title={trans.filters_title}
+            options={trans.services_options}
             value={filters.services}
             changeState={(val) => updateFilterField("services", val)}
          />
 
          <Button style={{ fontWeight: "600" }} onClick={handleSearch}>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
-            Поиск
+            {trans.search}
          </Button>
       </div>
    );

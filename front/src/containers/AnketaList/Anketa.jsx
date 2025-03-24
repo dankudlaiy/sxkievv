@@ -1,12 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import styles from './Anketa.module.sass';
 import clsx from 'clsx';
 import Button from '../../components/Button/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVenus, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import {useNavigate} from "react-router-dom"
+import {UserContext} from "../../context/Context"
 
 const Anketa = ({ data }) => {
+
+   const {trans} = useContext(UserContext)
+
    const navigate = useNavigate()
 
    const [isMobile, setIsMobile] = useState(false);
@@ -118,7 +122,7 @@ const Anketa = ({ data }) => {
                   <FontAwesomeIcon icon={faVenus} />
                   {data.name}
                </div>
-               <div className={styles.city}>Киев</div>
+               <div className={styles.city}>{trans.city}</div>
             </div>
 
             <div className={styles.middle}>
@@ -176,15 +180,15 @@ const Anketa = ({ data }) => {
                <div className={styles.right}>
                   <div className={styles.data_container}>
                      <div className={styles.data_row}>
-                        <div className={styles.data_title}>Возраст:</div>
+                        <div className={styles.data_title}>{trans.anketaNormal.age}:</div>
                         <div className={styles.data_value}>{data.age}</div>
                      </div>
                      <div className={styles.data_row}>
-                        <div className={styles.data_title}>Вес:</div>
+                        <div className={styles.data_title}>{trans.anketaNormal.weight}:</div>
                         <div className={styles.data_value}>{data.weight}кг</div>
                      </div>
                      <div className={styles.data_row}>
-                        <div className={styles.data_title}>Рост:</div>
+                        <div className={styles.data_title}>{trans.anketaNormal.height}:</div>
                         <div className={styles.data_value}>{data.height}см</div>
                      </div>
 
@@ -192,12 +196,12 @@ const Anketa = ({ data }) => {
                         style={{ borderTop: 'none', borderTopRightRadius: '4px', borderTopLeftRadius: '4px' }}
                         className={clsx(styles.data_row, styles.price)}
                      >
-                        <div className={styles.data_title}>1 час:</div>
+                        <div className={styles.data_title}>{trans.anketaNormal.hour}:</div>
                         <div className={styles.data_value}>{data.hourPrice}грн</div>
                      </div>
 
                      <div className={clsx(styles.data_row, styles.price)}>
-                        <div className={styles.data_title}>2 часа:</div>
+                        <div className={styles.data_title}>{trans.anketaNormal.twoHours}:</div>
                         <div className={styles.data_value}>{data.twoHourPrice}грн</div>
                      </div>
 
@@ -205,7 +209,7 @@ const Anketa = ({ data }) => {
                         style={{ borderBottomRightRadius: '4px', borderBottomLeftRadius: '4px' }}
                         className={clsx(styles.data_row, styles.price)}
                      >
-                        <div className={styles.data_title}>Ночь:</div>
+                        <div className={styles.data_title}>{trans.anketaNormal.night}:</div>
                         <div className={styles.data_value}>{data.nightPrice}грн</div>
                      </div>
                   </div>
@@ -213,9 +217,10 @@ const Anketa = ({ data }) => {
                   {isMobile && <div className={styles.description}>{data.description}</div>}
 
                   <Button type="submit" onClick={openAnketa}>
-                     ПОЛНАЯ АНКЕТА
+                     {trans.anketaNormal.fullProfile}
                   </Button>
                </div>
+
             </div>
          </div>
       </div>

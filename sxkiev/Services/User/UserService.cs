@@ -26,7 +26,7 @@ public class UserService : IUserService
             .Take(take)
             .Select(x => new SxKievUserResponseModel
             {
-                Balance = x.Balance,
+                Data = x.Data,
                 ChatId = x.ChatId,
                 CreatedAt = x.CreatedAt,
                 TelegramId = x.TelegramId,
@@ -58,7 +58,7 @@ public class UserService : IUserService
         if (user is null) throw new Exception("User not found");
         
         if (inputModel.IsAdmin.HasValue) user.IsAdmin = inputModel.IsAdmin.Value;
-        if (inputModel.Balance.HasValue) user.Balance = inputModel.Balance.Value;
+        if (inputModel.Data.HasValue) user.Data = inputModel.Data.Value;
         
         await _userRepository.UpdateAsync(user);
         

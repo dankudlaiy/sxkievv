@@ -1,7 +1,8 @@
-import React, {useRef} from 'react'
+import React, {useContext, useRef} from 'react'
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import styles from './Input.module.sass'
 import clsx from "clsx"
+import {UserContext} from "../../context/Context"
 
 const Input = ({
                   placeholder = '',
@@ -13,6 +14,8 @@ const Input = ({
                   name = '',
                   ...props
                }) => {
+
+   const {trans} = useContext(UserContext)
 
    // We use one ref for files in different modes
    const fileInputRef = useRef(null)
@@ -94,7 +97,7 @@ const Input = ({
                   <>
                      <p>{videoName}</p>
                      <p style={{ fontStyle: 'italic', marginTop: '5px' }}>
-                        Нажмите, чтобы выбрать другое видео
+                        {trans.input.clickToChangeVideo}
                      </p>
                   </>
                ) : (

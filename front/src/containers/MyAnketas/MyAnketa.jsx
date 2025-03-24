@@ -6,10 +6,10 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faBullhorn, faChevronLeft, faChevronRight, faClock, faEye, faEyeSlash, faPaperPlane, faPen, faTurnUp, faVenus} from '@fortawesome/free-solid-svg-icons'
 import {useNavigate} from "react-router-dom"
 import Hr from "../../components/Hr"
-import {Status, status_names, support_url} from "../../helpers/data"
+import {Status, status_names} from "../../helpers/data"
 import Loader from "../../components/Loader/Loader"
 import {getDaysLeft} from "../../helpers/helpers"
-import {UserContext} from "../../context/Context"
+import UserProvider, {UserContext} from "../../context/Context"
 
 
 function getTarrifById(id) {
@@ -25,6 +25,10 @@ function getTarrifById(id) {
 
 
 const MyAnketa = ({data}) => {
+   const {supportUrl, trans} = useContext(UserContext)
+
+   console.log(data)
+
    const navigate = useNavigate()
 
    const [status, setStatus] = useState(status_names[data.status])
@@ -56,6 +60,20 @@ const MyAnketa = ({data}) => {
       setStatus(new_status)
       setLoading(false)
    }
+
+   // const fetchViewClicks = async () => {
+   //    await fetch("/api/Profile?id=" + data.id, {
+   //       method : "PUT",
+   //       headers: {
+   //          'Content-Type' : 'application/json',
+   //          'Accept'       : 'application/json',
+   //          'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+   //       },
+   //       body   : JSON.stringify({
+   //          status: Status[new_status],
+   //       })
+   //    })
+   // }
 
    const changeStatus = (new_status) => {
       setLoading(true)
@@ -146,40 +164,40 @@ const MyAnketa = ({data}) => {
       navigate(`/${data.id}`)
    }
 
-   let status_title = <h2>Анкета видна на сайте</h2>
+   let status_title = <h2>{trans.myAnketa.visible}</h2>
    let show_btn = <Button onClick={() => changeStatus('Hidden')} style={{background: 'gray'}}>
       <FontAwesomeIcon icon={faEyeSlash}/>
-      Скрыть
+      {trans.myAnketa.hide}
    </Button>
 
    if (status === 'Hidden') {
       status_title = <div className={styles.status_container}>
-         <h2>Анкета скрыта из выдачи</h2>
-         <p>Сокрытие анкеты не останавливает списания дней</p>
+         <h2>{trans.myAnketa.hiddenTitle}</h2>
+         <p>{trans.myAnketa.hiddenNote}</p>
       </div>
 
       show_btn = <Button onClick={() => changeStatus('Active')}>
          <FontAwesomeIcon icon={faEye}/>
-         Показать
+         {trans.myAnketa.show}
       </Button>
    }
 
    let status_overlay = ''
    if (status === 'Banned') {
       status_overlay = <div className={clsx(styles.status_overlay, styles.ban)}>
-         <h2>БАН</h2>
-         <Button onClick={() => window.location.href = support_url}>
+         <h2>{trans.myAnketa.banned}</h2>
+         <Button onClick={() => window.location.href = supportUrl}>
             <FontAwesomeIcon icon={faPaperPlane}/>
-            Написать в поддержку
+            {trans.myAnketa.contactSupport}
          </Button>
       </div>
    }
 
    if (status === 'Expired') {
       status_overlay = <div className={clsx(styles.status_overlay, styles.expired)}>
-         <h2>Просрочено</h2>
+         <h2>{trans.myAnketa.expired}</h2>
          <Button onClick={() => navigate(`/profile/prolong/${data.id}`)}>
-            Продлить
+            {trans.myAnketa.prolong}
          </Button>
       </div>
    }
@@ -196,7 +214,7 @@ const MyAnketa = ({data}) => {
                   <FontAwesomeIcon icon={faVenus}/>
                   {data.name}
                </div>
-               <div className={styles.city}>Киев</div>
+               <div className={styles.city}>{trans.city}</div>
             </div>
 
             <div className={styles.middle}>
@@ -254,15 +272,15 @@ const MyAnketa = ({data}) => {
                <div className={styles.right}>
                   <div className={styles.data_container}>
                      <div className={styles.data_row}>
-                        <div className={styles.data_title}>Возраст:</div>
+                        <div className={styles.data_title}>{trans.myAnketa.age}:</div>
                         <div className={styles.data_value}>{data.age}</div>
                      </div>
                      <div className={styles.data_row}>
-                        <div className={styles.data_title}>Вес:</div>
+                        <div className={styles.data_title}>{trans.myAnketa.weight}:</div>
                         <div className={styles.data_value}>{data.weight}кг</div>
                      </div>
                      <div className={styles.data_row}>
-                        <div className={styles.data_title}>Рост:</div>
+                        <div className={styles.data_title}>{trans.myAnketa.height}:</div>
                         <div className={styles.data_value}>{data.height}см</div>
                      </div>
 
@@ -270,12 +288,12 @@ const MyAnketa = ({data}) => {
                         style={{borderTop: 'none', borderTopRightRadius: '4px', borderTopLeftRadius: '4px'}}
                         className={clsx(styles.data_row, styles.price)}
                      >
-                        <div className={styles.data_title}>1 час:</div>
+                        <div className={styles.data_title}>{trans.myAnketa.oneHour}:</div>
                         <div className={styles.data_value}>{data.hourPrice}грн</div>
                      </div>
 
                      <div className={clsx(styles.data_row, styles.price)}>
-                        <div className={styles.data_title}>2 часа:</div>
+                        <div className={styles.data_title}>{trans.myAnketa.twoHours}</div>
                         <div className={styles.data_value}>{data.twoHourPrice}грн</div>
                      </div>
 
@@ -283,7 +301,7 @@ const MyAnketa = ({data}) => {
                         style={{borderBottomRightRadius: '4px', borderBottomLeftRadius: '4px'}}
                         className={clsx(styles.data_row, styles.price)}
                      >
-                        <div className={styles.data_title}>Ночь:</div>
+                        <div className={styles.data_title}>{trans.myAnketa.night}:</div>
                         <div className={styles.data_value}>{data.nightPrice}грн</div>
                      </div>
                   </div>
@@ -291,7 +309,7 @@ const MyAnketa = ({data}) => {
                   {isMobile && <div className={styles.description}>{data.description}</div>}
 
                   <Button type="submit-noshine" onClick={openAnketa}>
-                     Посмотреть анкету
+                     {trans.myAnketa.viewProfile}
                   </Button>
                </div>
             </div>
@@ -303,23 +321,23 @@ const MyAnketa = ({data}) => {
 
                <div className={styles.admin_data}>
                   <div className={styles.admin_data_row}>
-                     <div className={styles.admin_data_title}>Пакет</div>
+                     <div className={styles.admin_data_title}>{trans.myAnketa.package}</div>
                      <div className={styles.admin_data_val}>{getTarrifById(data.type)}</div>
                   </div>
 
                   <div className={styles.admin_data_row}>
-                     <div className={styles.admin_data_title}>Осталось дней</div>
+                     <div className={styles.admin_data_title}>{trans.myAnketa.daysLeft}</div>
                      <div className={styles.admin_data_val}>{getDaysLeft(data.expirationDate)}</div>
                   </div>
 
                   <div className={styles.admin_data_row}>
-                     <div className={styles.admin_data_title}>Просмотры</div>
-                     <div className={styles.admin_data_val}>6234</div>
+                     <div className={styles.admin_data_title}>{trans.myAnketa.views}</div>
+                     <div className={styles.admin_data_val}>{data.clicks}</div>
                   </div>
 
                   <div className={styles.admin_data_row}>
-                     <div className={styles.admin_data_title}>Нажатий на телефон</div>
-                     <div className={styles.admin_data_val}>150</div>
+                     <div className={styles.admin_data_title}>{trans.myAnketa.phoneClicks}</div>
+                     <div className={styles.admin_data_val}>{data.mobileCalls}</div>
                   </div>
                </div>
 
@@ -330,24 +348,24 @@ const MyAnketa = ({data}) => {
 
                   <Button onClick={() => navigate(`/profile/change-tarrif/${data.id}`)}>
                      <FontAwesomeIcon icon={faTurnUp}/>
-                     Сменить тариф
+                     {trans.myAnketa.changeTariff}
                   </Button>
                   <Button onClick={() => navigate(`/profile/prolong/${data.id}`)}>
                      <FontAwesomeIcon icon={faClock} />
-                     Продлить анкету
+                     {trans.myAnketa.prolongProfile}
                   </Button>
-                  <Button>
-                     <FontAwesomeIcon icon={faBullhorn}/>
-                     Продвигать
-                  </Button>
+                  {/*<Button>*/}
+                  {/*   <FontAwesomeIcon icon={faBullhorn}/>*/}
+                  {/*   Продвигать*/}
+                  {/*</Button>*/}
                   <Button onClick={() => navigate(`/edit-anketa/${data.id}`)}>
                      <FontAwesomeIcon icon={faPen}/>
-                     Редактировать
+                     {trans.myAnketa.edit}
                   </Button>
 
                   <Button style={{background: 'red'}} onClick={() => navigate(`/profile/delete-anketa/${data.id}`)}>
                      <FontAwesomeIcon icon={faPen}/>
-                     Удалить
+                     {trans.myAnketa.delete}
                   </Button>
                </div>
             </div>

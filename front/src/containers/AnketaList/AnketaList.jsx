@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from "react"
 import { useSearchParams } from "react-router-dom";
 import styles from "./AnketaList.module.sass";
 import Anketa from "./Anketa";
 import Loader from "../../components/Loader/Loader";
+import {UserContext} from "../../context/Context"
 
 const AnketaList = () => {
    // We’ll load items in chunks of this size:
    const PAGE_SIZE = 5;
+
+   const {trans} = useContext(UserContext)
 
    const [profiles, setProfiles] = useState([]);
    const [loading, setLoading] = useState(false);
@@ -151,7 +154,7 @@ const AnketaList = () => {
    if (!loading && !error && profiles.length === 0) {
       return (
          <div className={styles.container}>
-            <h2 className={styles.notFound}>Анкет с заданными фильтрами не найдено</h2>
+            <h2 className={styles.notFound}>{trans.anketaList.notFound}</h2>
          </div>
       );
    }
@@ -160,7 +163,7 @@ const AnketaList = () => {
       return (
          <div className={styles.container}>
             <h2 className={styles.notFound}>
-               Ошибка, попробуйте перезагрузить страницу: {error}
+               {trans.anketaList.error}: {error}
             </h2>
          </div>
       );
@@ -173,19 +176,13 @@ const AnketaList = () => {
                <Anketa key={profile.id} data={profile} />
             ))}
 
-            {/*
-          Show the "Load more" button ONLY if:
-            1. Not loading
-            2. We have some profiles
-            3. hasMore is true (last fetch was full PAGE_SIZE)
-        */}
             {!loading && profiles.length > 0 && hasMore && (
                <div className={styles.loadMoreContainer}>
                   <button
                      className={styles.loadMore}
                      onClick={() => setSkip((prev) => prev + PAGE_SIZE)}
                   >
-                     Загрузить ещё
+                     {trans.anketaList.loadMore}
                   </button>
                </div>
             )}
@@ -194,6 +191,7 @@ const AnketaList = () => {
          </div>
       </div>
    );
+
 };
 
 export default AnketaList;

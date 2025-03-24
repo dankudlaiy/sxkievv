@@ -1,7 +1,8 @@
 import styles from './MyAnketas.module.sass'
-import React, {useEffect, useState} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {useSearchParams} from "react-router-dom"
 import MyAnketa from "./MyAnketa"
+import {UserContext} from "../../context/Context"
 
 const MyAnketas = () => {
    const [profiles, setProfiles] = useState([])
@@ -11,12 +12,14 @@ const MyAnketas = () => {
    const [skip, setSkip] = useState(0)
    const [hasMore, setHasMore] = useState(true);
 
+   const {trans} = useContext(UserContext)
+
    const fetchProfiles = async () => {
       setLoading(true)
 
       try {
          const response = await fetch(
-            `/api/Profile?take=10&skip=0`,
+            `/api/Profile?take=10&skip=${skip}`,
             {
                method: "GET",
                headers: {
@@ -53,7 +56,7 @@ const MyAnketas = () => {
       fetchProfiles()
    }, [skip])
 
-   if (error) return <p>Error: {error}</p>
+   if (error) return <p>{trans.list.error} {error}</p>
 
    return (
       <div className={styles.container}>
@@ -64,11 +67,11 @@ const MyAnketas = () => {
             {!loading && hasMore && (
                <div className={styles.loadMoreContainer}>
                   <button className={styles.loadMore} onClick={() => setSkip((prev) => prev + 10)}>
-                     Загрузить ещё
+                     {trans.list.loadMore}
                   </button>
                </div>
             )}
-            {loading && <p>Loading...</p>}
+            {loading && <p>{trans.list.loading}</p>}
          </div>
       </div>
    )

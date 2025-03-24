@@ -2,7 +2,7 @@ namespace sxkiev.Models;
 
 public class CurrentUserInfoResponseModel
 {
-    public double Balance { get; set; }
+    public double Data { get; set; }
     public IEnumerable<ApprovedDepResponseModel> Deps { get; set; }
     public IEnumerable<PaymentResponseModel> Payments { get; set; }
 }

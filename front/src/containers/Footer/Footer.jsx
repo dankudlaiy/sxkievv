@@ -1,40 +1,41 @@
 import styles from './Footer.module.sass'
 import {faPaperPlane} from "@fortawesome/free-solid-svg-icons"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import React from "react"
+import React, {useContext} from "react"
 import {Link} from "react-router-dom"
-import {support_url} from "../../helpers/data"
+import {UserContext} from "../../context/Context"
 
 const Footer = () => {
+   const {supportUrl} = useContext(UserContext)
+   const { trans } = useContext(UserContext);
+
    return (
       <div className={styles.container}>
          <div className={styles.left}>
             <Link to="/">
-               Главная
+               {trans.footer.home}
             </Link>
 
             <Link to="/add-anketa">
-               Добавить анкету
+               {trans.footer.addAnketa}
             </Link>
 
             <Link to="/profile">
-               Аккаунт
+               {trans.footer.profile}
             </Link>
          </div>
 
          <div className={styles.right}>
             <p>
-               Для того чтобы связаться с нами, пишите в телеграм
+               {trans.footer.contactInfo}
             </p>
 
-
-            <a href={support_url}>
+            <a href={supportUrl}>
                <FontAwesomeIcon
                   icon={faPaperPlane}
                   style={{marginRight: '8px'}}
                />
-
-               Связаться
+               {trans.footer.contactButton}
             </a>
          </div>
       </div>

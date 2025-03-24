@@ -3,7 +3,7 @@ import {NavLink, Outlet} from "react-router-dom"
 import Button from "../../components/Button/Button"
 import {faCoins, faDatabase, faList, faRightFromBracket, faUser} from "@fortawesome/free-solid-svg-icons"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
-import React, {useContext} from "react"
+import React, {useContext, useEffect} from "react"
 import {UserContext} from "../../context/Context"
 
 const UserProfile = () => {
@@ -41,7 +41,7 @@ const UserProfile = () => {
                )}
 
                {isAdmin && (
-                  <NavLink to="/profile/balance">
+                  <NavLink to="/profile/data">
                      <Button type="trans" style={{color: '#333', margin: 0}}>
                         <FontAwesomeIcon icon={faDatabase}/>
                         Общие данные

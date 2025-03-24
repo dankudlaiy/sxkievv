@@ -1,13 +1,22 @@
 import {createContext, useState, useEffect} from "react"
+import {translations} from "../helpers/text"
 
 export const UserContext = createContext(null)
 
 export default function UserProvider({children}) {
    const [user, setUser] = useState(null)
 
+   const [supportUrl, setSupportUrl] = useState('')
+   const [tgBotUrl, setBotUrl] = useState('')
+
+   const [lang, setLang] = useState('ru')
+   const [trans, setTrans] = useState(translations.ru)
+
    // On mount: check localStorage for token, fetch role
    useEffect(() => {
       (async () => {
+
+         // Auth user
          const token = localStorage.getItem("authToken")
          if (!token) return
 
@@ -27,6 +36,21 @@ export default function UserProvider({children}) {
          } catch (err) {
             setUser(null)
          }
+
+         // Get basic data
+         const res = await fetch("/api/Plan/options", {
+            method : "GET",
+            headers: {
+               'Content-Type' : 'application/json',
+               'Accept'       : 'application/json',
+               'Authorization': `Bearer ${localStorage.getItem("authToken")}`,
+            },
+         })
+
+         const data = await res.json()
+
+         setSupportUrl(data.supportUrl)
+         setBotUrl(data.tgBotUrl)
       })()
    }, [])
 
@@ -58,8 +82,13 @@ export default function UserProvider({children}) {
       window.location.href = '/'
    }
 
+   function toggleLang() {
+      setTrans(translations[lang === 'ru' ? 'en' : 'ru'])
+      setLang(lang === 'ru' ? 'en' : 'ru')
+   }
+
    return (
-      <UserContext.Provider value={{user, login, logout}}>
+      <UserContext.Provider value={{user, login, logout, tgBotUrl, supportUrl, lang, toggleLang, trans}}>
          {children}
       </UserContext.Provider>
    )
