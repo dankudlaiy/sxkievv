@@ -19,6 +19,8 @@ public class ProfileResponseModel
     public double NightPrice { get; set; }
     public bool Apartment { get; set; }
     public bool ToClient { get; set; }
+    public int Clicks { get; set; }
+    public int MobileCalls { get; set; }
     public IEnumerable<string> Photos { get; set; }
     public IEnumerable<string> Videos { get; set; }
     public IEnumerable<string> Favours { get; set; }
