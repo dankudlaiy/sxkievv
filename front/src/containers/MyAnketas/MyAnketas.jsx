@@ -9,6 +9,7 @@ const MyAnketas = () => {
    const [error, setError] = useState(null)
    const [searchParams] = useSearchParams()
    const [skip, setSkip] = useState(0)
+   const [hasMore, setHasMore] = useState(true);
 
    const fetchProfiles = async () => {
       setLoading(true)
@@ -29,7 +30,13 @@ const MyAnketas = () => {
          const res_data = await response.json()
          console.log(res_data)
 
-         setProfiles(res_data)
+         setProfiles(res_data.profiles)
+
+         if (res_data.profiles.length < 10) {
+            setHasMore(false);
+         } else {
+            setHasMore(true);
+         }
       } catch (err) {
          setError(err.message)
       } finally {
@@ -54,7 +61,7 @@ const MyAnketas = () => {
             {profiles.map((profile) => (
                <MyAnketa key={profile.id} data={profile}/>
             ))}
-            {!loading && (
+            {!loading && hasMore && (
                <div className={styles.loadMoreContainer}>
                   <button className={styles.loadMore} onClick={() => setSkip((prev) => prev + 10)}>
                      Загрузить ещё

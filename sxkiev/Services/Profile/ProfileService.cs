@@ -17,6 +17,7 @@ public class ProfileService : IProfileService
     private readonly IRepository<ProfileFavour> _favourRepository;
     private readonly IRepository<ProfileMedia> _mediaRepository;
     private readonly IRepository<ProfileAction> _actionRepository;
+    private readonly IRepository<ProfilePlan> _planRepository;
     private readonly TelegramBotClient _botClient;
     private readonly IMediaService _mediaService;
     private readonly IPlanService _planService;
@@ -27,7 +28,7 @@ public class ProfileService : IProfileService
         IServiceProvider serviceProvider, IRepository<SxKievUser> userRepository, 
         IMediaService mediaService, IWebHostEnvironment webHostEnvironment, IPlanService planService, 
         IRepository<ProfileDistrict> districtRepository, IRepository<ProfileFavour> favourRepository, 
-        IRepository<ProfileMedia> mediaRepository, IRepository<ProfileAction> actionRepository)
+        IRepository<ProfileMedia> mediaRepository, IRepository<ProfileAction> actionRepository, IRepository<ProfilePlan> planRepository)
     {
         _profileRepository = profileRepository;
         _userRepository = userRepository;
@@ -37,34 +38,17 @@ public class ProfileService : IProfileService
         _favourRepository = favourRepository;
         _mediaRepository = mediaRepository;
         _actionRepository = actionRepository;
+        _planRepository = planRepository;
         _rootPath = webHostEnvironment.WebRootPath;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
         _adminChatId = long.Parse(serviceProvider.GetRequiredService<IConfiguration>()["AdminChatId"]!);
     }
 
-    public async Task<(int, IEnumerable<SxKievProfile>)> GetAllProfilesAsync(int skip, int take)
+    public async Task<ProfilesResponseModel> GetProfilesByUser(long userId, int skip, int take)
     {
-        var query = await _profileRepository.AsQueryable();
-        query = query
-            .OrderByDescending(x => x.Plan.Type)
-            .ThenByDescending(x => x.CreatedAt);
-        
-        var count = await query.CountAsync();
-        
-        query = query.Skip(skip).Take(take);
-        
-        var profiles = await query.ToListAsync();
-        
-        return (count, profiles);
-    }
-
-    public async Task<IEnumerable<ProfileResponseModel?>> GetProfilesByUser(long userId, int skip, int take)
-    {
-        return await _profileRepository
+        var query = _profileRepository
             .Query(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAt)
-            .Skip(skip)
-            .Take(take)
             .Select(x => new ProfileResponseModel
             {
                 Age = x.Age,
@@ -88,29 +72,48 @@ public class ProfileService : IProfileService
                 Videos = x.Media.Select(m => m.Media).Where(w => w.Type.Contains("video")).Select(y => y.Path),
                 Districts = x.Districts.Select(y => y.District.ToString()),
                 Favours = x.Favours.Select(y => y.Favour.ToString())
-            })
+            });
+
+        var count = await query.CountAsync();
+        
+        var paginated = await query
+            .Skip(skip)
+            .Take(take)
             .ToListAsync();
+
+        return new ProfilesResponseModel
+        {
+            Count = count,
+            Profiles = paginated
+        };
     }
 
-    public async Task<ActionsResponseModel> GetActionsAsync(Guid profileId, string action)
+    public async Task<ActionsResponseModel> GetActionsAsync(Guid profileId)
     {
         var query = _actionRepository
-            .Query(x => x.ProfileId == profileId && x.Action == action)
-            .GroupBy(x => x.Date.Date)
-            .OrderByDescending(x => x.Key)
-            .Select(x => new ActionResponseModel
+            .Query(x => x.ProfileId == profileId)
+            .GroupBy(x => x.Action)
+            .Select(actionGroup => new ActionResponseModel
             {
-                Date = x.Key,
-                Count = x.Count()
-            });
-        
-        var responseModel = new ActionsResponseModel
+                Action = actionGroup.Key,
+                Dates = actionGroup
+                    .GroupBy(a => a.Date.Date)
+                    .Select(dateGroup => new ActionDateResponseModel
+                    {
+                        Date = dateGroup.Key,
+                        Count = dateGroup.Count()
+                    })
+                    .OrderByDescending(d => d.Date)
+                    .ToList()
+            })
+            .OrderByDescending(a => a.Action);
+
+        var response = new ActionsResponseModel
         {
-            Action = action,
             Actions = await query.ToListAsync()
         };
-        
-        return responseModel;
+
+        return response;
     }
 
     public async Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input)
@@ -259,71 +262,35 @@ public class ProfileService : IProfileService
         return profile;
     }
 
-    public async Task UpdateProfileAsync(Guid id, UpdateProfileInputModel inputModel)
+    public async Task UpdateProfileAsync(Guid id, UpdateProfileInputModel inputModel, bool isAdmin = false)
     {
         var profile = await _profileRepository.FirstOrDefaultAsync(x => x.Id == id);
         
         if (profile is null) throw new Exception("Profile not found");
 
-        if (!string.IsNullOrEmpty(inputModel.Name))
-        {
-            profile.Name = inputModel.Name;
-        }
+        if (!string.IsNullOrEmpty(inputModel.Name)) profile.Name = inputModel.Name;
 
-        if (!string.IsNullOrEmpty(inputModel.Description))
-        {
-            profile.Description = inputModel.Description;
-        }
+        if (!string.IsNullOrEmpty(inputModel.Description)) profile.Description = inputModel.Description;
         
-        if (!string.IsNullOrEmpty(inputModel.Phone))
-        {
-            profile.Phone = inputModel.Phone;
-        }
+        if (!string.IsNullOrEmpty(inputModel.Phone)) profile.Phone = inputModel.Phone;
 
-        if (inputModel.Age is not null)
-        {
-            profile.Age = inputModel.Age.Value;
-        }
+        if (inputModel.Age is not null) profile.Age = inputModel.Age.Value;
 
-        if (inputModel.Height is not null)
-        {
-            profile.Height = inputModel.Height.Value;
-        }
+        if (inputModel.Height is not null) profile.Height = inputModel.Height.Value;
 
-        if (inputModel.Breast is not null)
-        {
-            profile.Breast = inputModel.Breast.Value;
-        }
+        if (inputModel.Breast is not null) profile.Breast = inputModel.Breast.Value;
 
-        if (inputModel.Weight is not null)
-        {
-            profile.Weight = inputModel.Weight.Value;
-        }
+        if (inputModel.Weight is not null) profile.Weight = inputModel.Weight.Value;
 
-        if (inputModel.HourPrice is not null)
-        {
-            profile.HourPrice = inputModel.HourPrice.Value;
-        }
+        if (inputModel.HourPrice is not null) profile.HourPrice = inputModel.HourPrice.Value;
 
-        if (inputModel.TwoHourPrice is not null)
-        {
-            profile.TwoHourPrice = inputModel.TwoHourPrice.Value;
-        }
+        if (inputModel.TwoHourPrice is not null) profile.TwoHourPrice = inputModel.TwoHourPrice.Value;
 
-        if (inputModel.NightPrice is not null)
-        {
-            profile.NightPrice = inputModel.NightPrice.Value;
-        }
+        if (inputModel.NightPrice is not null) profile.NightPrice = inputModel.NightPrice.Value;
         
-        if (inputModel.Apartment is not null)
-        {
-            profile.Apartment = inputModel.Apartment.Value;
-        }
+        if (inputModel.Apartment is not null) profile.Apartment = inputModel.Apartment.Value;
 
-        if (inputModel.ToClient is not null)
-        {
-            profile.ToClient = inputModel.ToClient.Value;
-        }
+        if (inputModel.ToClient is not null) profile.ToClient = inputModel.ToClient.Value;
 
         if (inputModel.PlanId is not null)
         {
@@ -332,7 +299,7 @@ public class ProfileService : IProfileService
 
             if (plan is null || oldPlan is null) throw new Exception("Plan not found");
 
-            if (DateTime.UtcNow < profile.ExpirationDate)
+            if (DateTime.UtcNow < profile.ExpirationDate && !isAdmin)
             {
                 var daysLeft = profile.ExpirationDate - DateTime.UtcNow;
                 var oldPricePerDay = oldPlan.Price /(double) oldPlan.Duration * 30;
@@ -346,9 +313,9 @@ public class ProfileService : IProfileService
             profile.PlanId = inputModel.PlanId.Value;
         }
 
-        if (inputModel.Status is not null && profile.Status != ProfileStatus.Banned && profile.Status != ProfileStatus.Pending &&
-            profile.Status != ProfileStatus.Rejected && profile.Status != ProfileStatus.Expired &&
-            inputModel.Status is ProfileStatus.Active or ProfileStatus.Hidden)
+        if (inputModel.Status is not null &&
+            (!isAdmin && profile.Status is ProfileStatus.Active or ProfileStatus.Hidden &&
+                inputModel.Status is ProfileStatus.Active or ProfileStatus.Hidden || isAdmin))
         {
             profile.Status = inputModel.Status.Value;
         }
@@ -396,6 +363,47 @@ public class ProfileService : IProfileService
         }
         
         await _profileRepository.UpdateAsync(profile);
+    }
+
+    public async Task RenewProfileAsync(Guid id, long userId, int months)
+    {
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.TelegramId == userId);
+        
+        if (user is null) throw new Exception("User not found");
+        
+        var profile = await _profileRepository
+            .Query(x => x.Id == id)
+            .Include(x => x.Plan)
+            .FirstOrDefaultAsync();
+        
+        if (profile is null || profile.UserId != userId) throw new Exception("Profile not found");
+
+        if (profile.Status != ProfileStatus.Active && profile.Status != ProfileStatus.Expired &&
+            profile.Status != ProfileStatus.Hidden)
+        {
+            throw new Exception("Profile is not active");
+        }
+        
+        var plan = await _planRepository.FirstOrDefaultAsync(x => x.Type == profile.Plan.Type && x.Duration == months);
+        
+        if (plan is null) throw new Exception("Plan not found");
+        
+        if (user.Balance < plan.Price) throw new Exception("Not enough balance");
+
+        user.Balance -= plan.Price;
+        
+        var start = DateTime.UtcNow;
+
+        if (profile.ExpirationDate > start)
+        {
+            start = profile.ExpirationDate;
+        }
+
+        profile.ExpirationDate = start.AddMonths(plan.Duration);
+        
+        await _profileRepository.UpdateAsync(profile);
+        
+        await _userRepository.UpdateAsync(user);
     }
 
     public async Task<SxKievProfile> AddProfileAsync(SxKievProfile profile)

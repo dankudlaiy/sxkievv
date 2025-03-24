@@ -24,3 +24,9 @@ public class ProfileResponseModel
     public IEnumerable<string> Favours { get; set; }
     public IEnumerable<string> Districts { get; set; }
 }
+
+public class ProfilesResponseModel
+{
+    public int Count { get; set; }
+    public required IEnumerable<ProfileResponseModel> Profiles { get; set; }
+}

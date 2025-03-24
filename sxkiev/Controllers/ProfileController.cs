@@ -32,9 +32,9 @@ public class ProfileController : ControllerBase
 
     [HttpGet("actions")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetActions([FromQuery] Guid id, [FromQuery] string action)
+    public async Task<IActionResult> GetActions([FromQuery] Guid id)
     {
-        var actions = await _profileService.GetActionsAsync(id, action);
+        var actions = await _profileService.GetActionsAsync(id);
         return Ok(actions);
     }
 
@@ -166,6 +166,16 @@ public class ProfileController : ControllerBase
     public async Task<IActionResult> UpdateProfile([FromQuery] Guid id, [FromBody] UpdateProfileInputModel profile)
     {
         await _profileService.UpdateProfileAsync(id, profile);
+        return NoContent();
+    }
+
+    [HttpPut("renew")]
+    public async Task<IActionResult> RenewProfile([FromQuery] Guid id, [FromQuery] int months)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return BadRequest();
+
+        await _profileService.RenewProfileAsync(id, long.Parse(userId), months);
         return NoContent();
     }
 

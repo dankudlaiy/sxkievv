@@ -11,7 +11,8 @@ namespace sxkiev;
 
 public static class States
 {
-    public const string Dep = "dep";
+    public const string UahDep = "uahdep";
+    public const string CryptoDep = "cryptodep";
     public const string Method = "method";
     public const string Details = "details";
 }
@@ -63,6 +64,37 @@ public class BotHostedService : BackgroundService
             var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
             var botService = scope.ServiceProvider.GetRequiredService<IBotService>();
             var isAdmin = update.Message.Chat.Id == _adminChatId;
+
+            if (update.Message?.Text == "/start")
+            {
+                var token = await authService.CreateLoginLink(new CreateLoginLinkInputModel
+                {
+                    UserId = userId,
+                    ChatId = update.Message.Chat.Id,
+                    Username = username!,
+                    IsAdmin = isAdmin
+                });
+
+                await botClient.SendMessage(
+                    chatId: update.Message.Chat.Id,
+                    text: token,
+                    cancellationToken: cancellationToken);
+                
+                var userProfile = await botService.GetUserProfile(update.Message.From!.Id);
+
+                var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
+                var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
+                    Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
+                        "replenish_start"));
+
+                await _botClient.SendMessage(
+                    update.Message.Chat.Id,
+                    text,
+                    replyMarkup: keyboard,
+                    cancellationToken: cancellationToken);
+
+                return;
+            }
             
             if (update.Message?.Text == "/auth")
             {
@@ -79,15 +111,6 @@ public class BotHostedService : BackgroundService
                     text: token,
                     cancellationToken: cancellationToken);
 
-                // var adminMessage = $"❗ Попытка входа ❗\n" +
-                //                    $"👤 Пользователь: {username} ({fullName})\n" +
-                //                    $"🆔 Telegram ID: {userId}";
-                //
-                // await botClient.SendMessage(
-                //     chatId: _adminChatId,
-                //     text: adminMessage,
-                //     cancellationToken: cancellationToken);
-
                 return;
             }
 
@@ -95,8 +118,7 @@ public class BotHostedService : BackgroundService
             {
                 var userProfile = await botService.GetUserProfile(update.Message.From!.Id);
 
-                var text =
-                    $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
+                var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
                 var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
                         "replenish_start"));
@@ -110,14 +132,13 @@ public class BotHostedService : BackgroundService
                 return;
             }
 
-            if (GetUserState(userId) == States.Dep)
+            if (GetUserState(userId) == States.UahDep)
             {
                 if (!double.TryParse(update.Message!.Text, out var amount))
                 {
                     ClearUserState(userId);
                     var userProfile = await botService.GetUserProfile(update.Message!.From!.Id);
-                    var text =
-                        $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
+                    var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
                     var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                         Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
                             "replenish_start"));
@@ -221,15 +242,35 @@ public class BotHostedService : BackgroundService
             
             if (update.CallbackQuery?.Data == "replenish_start")
             {
-                SetUserState(userId, States.Dep);
+                SetUserState(userId, States.Method);
 
+                var adminKeyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup([
+                    [
+                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("uah", "uah"),
+                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("crypto", "crypto")
+                    ]
+                ]);
+                
                 await _botClient.EditMessageText(
                     update.CallbackQuery.Message!.Chat.Id,
                     update.CallbackQuery.Message.Id,
-                    "Введите сумму, которую вы хотите пополнить:",
+                    "Метод оплаты:",
+                    replyMarkup: adminKeyboard,
                     cancellationToken: cancellationToken);
 
                 return;
+            }
+
+            if (update.CallbackQuery?.Data == "uah")
+            {
+                // "Введите сумму, которую вы хотите пополнить:",
+                SetUserState(userId, States.UahDep);
+            }
+
+            if (update.CallbackQuery?.Data == "crypto")
+            {
+                // "Введите сумму, которую вы хотите пополнить:",
+                SetUserState(userId, States.CryptoDep);
             }
 
             if (update.CallbackQuery?.Data?.StartsWith("approve_replenish_") == true)

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using sxkiev.Data;
 using sxkiev.Models;
 using sxkiev.Services.Profile;
 using sxkiev.Services.User;
@@ -34,17 +33,17 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetUserById(int id)
     {
         var user = await _userService.GetUserByIdAsync(id);
-        if (user == null)
-            return NotFound();
+        
+        if (user == null) return NotFound();
 
         return Ok(user);
     }
 
     [HttpPut("users")]
-    public async Task<IActionResult> UpdateUser([FromBody] SxKievUser user)
+    public async Task<IActionResult> UpdateUser([FromQuery] long id, [FromBody] UpdateUserInputModel inputModel)
     {
-        await _userService.UpdateUserAsync(user);
-        return NoContent();
+        var user = await _userService.UpdateUserAsync(id, inputModel);
+        return Ok(user);
     }
 
     #endregion
@@ -52,10 +51,10 @@ public class AdminController : ControllerBase
     #region Profiles
 
     [HttpGet("profiles")]
-    public async Task<IActionResult> GetAllProfiles([FromQuery] int skip, [FromQuery] int take)
+    public async Task<IActionResult> GetProfiles([FromQuery] long userId, [FromQuery] int skip, [FromQuery] int take)
     {
-        var profiles = await _profileService.GetAllProfilesAsync(skip, take);
-        return Ok(new { Count = profiles.Item1, Profiles = profiles.Item2 });
+        var profiles = await _profileService.GetProfilesByUser(userId, skip, take);
+        return Ok(profiles);
     }
 
     [HttpGet("profiles/{id:guid}")]
@@ -74,7 +73,7 @@ public class AdminController : ControllerBase
     [HttpPut("profiles")]
     public async Task<IActionResult> UpdateProfile([FromQuery] Guid id, [FromBody] UpdateProfileInputModel profile)
     {
-        await _profileService.UpdateProfileAsync(id, profile);
+        await _profileService.UpdateProfileAsync(id, profile, true);
         return NoContent();
     }
 

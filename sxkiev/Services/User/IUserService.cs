@@ -1,11 +1,12 @@
 ﻿using sxkiev.Data;
+using sxkiev.Models;
 
 namespace sxkiev.Services.User;
 
 public interface IUserService
 {
-    Task<(int, IEnumerable<SxKievUser>)> GetAllUsersAsync(int skip, int take);
+    Task<(int, IEnumerable<SxKievUserResponseModel>)> GetAllUsersAsync(int skip, int take);
     Task<SxKievUser?> GetUserByIdAsync(long id);
     Task AddUserAsync(SxKievUser user);
-    Task UpdateUserAsync(SxKievUser user);
+    Task<SxKievUser> UpdateUserAsync(long id, UpdateUserInputModel inputModel);
 }
