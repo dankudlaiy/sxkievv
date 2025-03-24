@@ -388,9 +388,9 @@ public class ProfileService : IProfileService
         
         if (plan is null) throw new Exception("Plan not found");
         
-        if (user.Balance < plan.Price) throw new Exception("Not enough balance");
+        if (user.Data < plan.Price) throw new Exception("Not enough balance");
 
-        user.Balance -= plan.Price;
+        user.Data -= plan.Price;
         
         var start = DateTime.UtcNow;
 
@@ -416,9 +416,9 @@ public class ProfileService : IProfileService
         
         if (plan is null) throw new Exception("Plan not found");
 
-        if (user.Balance < plan.Price) throw new Exception("Not enough balance");
+        if (user.Data < plan.Price) throw new Exception("Not enough balance");
 
-        user.Balance -= plan.Price;
+        user.Data -= plan.Price;
 
         profile.ExpirationDate = DateTime.UtcNow.AddMonths(plan.Duration);
 

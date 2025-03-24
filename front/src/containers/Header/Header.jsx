@@ -4,12 +4,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faUser, faBars } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { login_url } from "../../helpers/data";
-import {UserContext} from "../../context/Context"
+import UserProvider, {UserContext} from "../../context/Context"
 
 export default function Header() {
+   const {tgBotUrl, toggleLang, lang} = useContext(UserContext)
+
    const navigate = useNavigate();
-   const { user, logout } = useContext(UserContext);
+   const { user, trans } = useContext(UserContext);
 
    // For admin check, see user?.role === "admin"
    const isAdmin = user?.role === "admin";
@@ -33,9 +34,9 @@ export default function Header() {
       return (
          <>
             {isAdmin && (
-               <Button style={{ fontWeight: "600" }} onClick={() => navigate("/admin")}>
+               <Button style={{ fontWeight: "600" }} onClick={() => navigate("/profile/users")}>
                   <FontAwesomeIcon icon={faUser} />
-                  Админ
+                  {trans.header.admin}
                </Button>
             )}
 
@@ -46,27 +47,31 @@ export default function Header() {
                      onClick={() => navigate("/profile")}
                   >
                      <FontAwesomeIcon icon={faUser} />
-                     Профиль
+                     {trans.header.profile}
                   </Button>
                   <Button
                      style={{ fontWeight: "600" }}
                      onClick={() => navigate("/add-anketa")}
                   >
                      <FontAwesomeIcon icon={faPlus} />
-                     Анкета
+                     {trans.header.addAnketa}
                   </Button>
                </>
             ) : (
                <Button
                   style={{ fontWeight: "600" }}
                   onClick={() => {
-                     window.location.href = login_url;
+                     window.location.href = tgBotUrl;
                   }}
                >
                   <FontAwesomeIcon icon={faUser} />
-                  Войти
+                  {trans.header.login}
                </Button>
             )}
+
+            <Button type={'trans'} style={{margin: 0, boxShadow: 'none'}} onClick={toggleLang}>
+               {lang === 'en' ? 'RU ' : 'EN'}
+            </Button>
          </>
       );
    }

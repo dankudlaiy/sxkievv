@@ -82,7 +82,7 @@ public class BotHostedService : BackgroundService
                 
                 var userProfile = await botService.GetUserProfile(update.Message.From!.Id);
 
-                var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
+                var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Data}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
                 var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
                         "replenish_start"));
@@ -118,7 +118,7 @@ public class BotHostedService : BackgroundService
             {
                 var userProfile = await botService.GetUserProfile(update.Message.From!.Id);
 
-                var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
+                var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Data}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
                 var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
                         "replenish_start"));
@@ -138,7 +138,7 @@ public class BotHostedService : BackgroundService
                 {
                     ClearUserState(userId);
                     var userProfile = await botService.GetUserProfile(update.Message!.From!.Id);
-                    var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
+                    var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Data}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
                     var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                         Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
                             "replenish_start"));

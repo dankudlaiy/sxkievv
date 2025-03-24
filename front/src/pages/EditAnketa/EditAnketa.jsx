@@ -1,6 +1,6 @@
 import styles from "./EditAnketa.module.sass";
 import Input from "../../components/Input/Input";
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from "react"
 import Hr from "../../components/Hr";
 import { kievNeighborhoodsAndMetros, plans, servicesList } from "../../helpers/data";
 import Button from "../../components/Button/Button";
@@ -8,6 +8,7 @@ import Loader from "../../components/Loader/Loader";
 import {faArrowLeft, faList} from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {NavLink, useNavigate, useParams} from "react-router-dom"
+import {UserContext} from "../../context/Context"
 
 function getPackageType(packageName, term) {
    let x_package = 1;
@@ -583,7 +584,7 @@ const EditAnketa = () => {
 
                <div className={styles.add_container}>
                   <Button submit={true} type="submit-noshine">
-                     Добавить анкету
+                     Изменить анкету
                   </Button>
                </div>
             </form>

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import styles from './AnketaProfile.module.sass'
 import clsx from 'clsx'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
@@ -6,9 +6,12 @@ import {faVenus, faChevronLeft, faChevronRight, faCheck, faArrowLeft} from '@for
 import Button from "../../components/Button/Button"
 import {useNavigate, useParams} from "react-router-dom"
 import Loader from "../../components/Loader/Loader"
+import {UserContext} from "../../context/Context"
 
 
 export default function AnketaProfile({}) {
+   const {trans, user} = useContext(UserContext)
+
    const {id} = useParams()
    const navigate = useNavigate()
 
@@ -66,17 +69,55 @@ export default function AnketaProfile({}) {
       setData({
          ...res_data,
          access: [res_data.apartment && 'У себя', res_data.toClient && 'Выезд к клиенту'].filter(Boolean),
-         video: res_data.videos.length && res_data.videos[0],
+         video : res_data.videos.length && res_data.videos[0],
       })
 
       setLoading(false)
    }
+
+   const trackClick = async () => {
+      await fetch(
+         `/api/Profile/actions?id=${id}`,
+         {
+            method : "POST",
+            headers: {
+               "Content-Type": "application/json",
+               "Accept"      : "application/json",
+            },
+            body: JSON.stringify({
+               'action': 'mobile_call'
+            })
+         }
+      )
+   }
+
 
    // Simulate async data load
    useEffect(() => {
       fetchProfile()
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [])
+
+   useEffect(() => {
+      (async () => {
+         if (!user) {
+            await fetch(
+               `/api/Profile/actions?id=${id}`,
+               {
+                  method : "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                     "Accept"      : "application/json",
+                  },
+                  body: JSON.stringify({
+                     'action': 'clicks'
+                  })
+               }
+            )
+         }
+      })()
+   }, [id, user])
+
 
    // Auto-slide every 6s (on mobile + multiple photos)
    const startAutoSlideTimer = () => {
@@ -144,7 +185,7 @@ export default function AnketaProfile({}) {
          <div className={styles.backContainer}>
             <Button onClick={() => navigate(-1)}>
                <FontAwesomeIcon icon={faArrowLeft}/>
-               Назад
+               {trans.anketaProfile.back}
             </Button>
          </div>
 
@@ -207,27 +248,27 @@ export default function AnketaProfile({}) {
                <div className={styles.rightSide}>
                   <div className={styles.infoTop}>
                      <div className={styles.infoName}>
-                        Имя: <span>{data.name}</span>
+                        {trans.anketaProfile.nameLabel} <span>{data.name}</span>
                      </div>
-                     <div className={styles.infoPhone}>
-                        Телефон: <a type="tel" href={data.phone}>{data.phone}</a>
+                     <div className={styles.infoPhone} onClick={trackClick}>
+                        {trans.anketaProfile.phoneLabel} <a href={`tel:${data.phone}`}>{data.phone}</a>
                      </div>
                      <div className={styles.warning}>
-                        Девушки с осторожностью относятся к звонкам, поэтому скажите ей, что узнали про неё на сайте
-                        <strong> Ночной Киев</strong>. Чтобы не нарваться на мошенников не совершайте предоплату.
+                        {trans.anketaProfile.warning}
+                        <strong> {trans.anketaProfile.warningStrong} </strong>. {trans.anketaProfile.noPrepay}
                      </div>
 
                      <div className={styles.priceRow}>
                         <div className={styles.priceBox}>
-                           <div>1 час:</div>
+                           <div>{trans.anketaProfile.hour}</div>
                            <div>{data.hourPrice}грн</div>
                         </div>
                         <div className={styles.priceBox}>
-                           <div>2 часа:</div>
+                           <div>{trans.anketaProfile.twoHours}</div>
                            <div>{data.twoHourPrice}грн</div>
                         </div>
                         <div className={styles.priceBox}>
-                           <div>Ночь:</div>
+                           <div>{trans.anketaProfile.night}</div>
                            <div>{data.nightPrice}грн</div>
                         </div>
                      </div>
@@ -236,31 +277,31 @@ export default function AnketaProfile({}) {
                   <div className={styles.dataBlock}>
                      <div className={styles.dataRow}>
                         <div className={styles.dataCol}>
-                           <div className={styles.label}>Грудь:</div>
+                           <div className={styles.label}>{trans.anketaProfile.breast}</div>
                            <div className={styles.value}>{data.breast}</div>
                         </div>
                         <div className={styles.dataCol}>
-                           <div className={styles.label}>Возраст:</div>
+                           <div className={styles.label}>{trans.anketaProfile.age}</div>
                            <div className={styles.value}>{data.age}</div>
                         </div>
                      </div>
                      <div className={styles.dataRow}>
                         <div className={styles.dataCol}>
-                           <div className={styles.label}>Рост:</div>
+                           <div className={styles.label}>{trans.anketaProfile.height}</div>
                            <div className={styles.value}>{data.height}</div>
                         </div>
                         <div className={styles.dataCol}>
-                           <div className={styles.label}>Вес:</div>
+                           <div className={styles.label}>{trans.anketaProfile.weight}</div>
                            <div className={styles.value}>{data.weight}</div>
                         </div>
                      </div>
 
                      <div className={styles.dataSingleRow}>
-                        <div className={styles.label}>Район и метро:</div>
+                        <div className={styles.label}>{trans.anketaProfile.district}</div>
                         <div className={styles.value}>{data.districts[0]}</div>
                      </div>
                      <div className={styles.dataSingleRow}>
-                        <div className={styles.label}>Принимает:</div>
+                        <div className={styles.label}>{trans.anketaProfile.access}</div>
                         <div className={styles.value}>{(data.access || []).join(', ')}</div>
                      </div>
                   </div>
@@ -268,7 +309,7 @@ export default function AnketaProfile({}) {
                   <div className={styles.descBlock}>{data.description}</div>
 
                   <div className={styles.servicesBlock}>
-                     <h3>Интим услуги девушки {data.name}</h3>
+                     <h3>{trans.anketaProfile.servicesTitle} {data.name}</h3>
                      <div className={styles.servicesList}>
                         {(data.favours || []).map((srv) => (
                            <div key={srv} className={styles.serviceItem}>

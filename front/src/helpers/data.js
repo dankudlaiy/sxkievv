@@ -1,7 +1,3 @@
-export const login_url = 'https://t.me/sxkiev_bot'
-export const support_url = 'https://t.me/saul_gooddman'
-
-
 
 export const Status = {
    Pending: 0,

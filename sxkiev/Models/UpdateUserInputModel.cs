@@ -2,6 +2,6 @@
 
 public class UpdateUserInputModel
 {
-    public double? Balance { get; set; }
+    public double? Data { get; set; }
     public bool? IsAdmin { get; set; }
 }

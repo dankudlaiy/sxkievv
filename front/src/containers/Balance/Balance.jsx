@@ -1,11 +1,14 @@
-import React, {useEffect, useState} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import styles from "./Balance.module.sass"
 import {faChevronDown, faMinus, faPlus} from "@fortawesome/free-solid-svg-icons"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import Button from "../../components/Button/Button"
+import {UserContext} from "../../context/Context"
 
 export default function Balance() {
    // Controls whether the table is open or closed
+   const {tgBotUrl, trans} = useContext(UserContext)
+
    const [openPlans, setOpenPlans] = useState(false)
    const [openTopups, setOpenTopups] = useState(false)
    const [openWithdraws, setOpenWithdraws] = useState(false)
@@ -62,11 +65,11 @@ export default function Balance() {
    return (
       <div className={styles.container}>
 
-         <h2 style={{alignSelf: 'flex-start'}}>Текущий баланс: {curBalance}$</h2>
+         <h2 style={{alignSelf: 'flex-start'}}>{trans.balance.currentBalance}: {curBalance}$</h2>
 
          <div className={styles.faqItem}>
             <div className={styles.faqTitle} onClick={() => setOpenPlans(!openPlans)}>
-               <span className={styles.faqTitleText}>Стоимость размещения и виды анкет</span>
+               <span className={styles.faqTitleText}>{trans.balance.faqTitle}</span>
                <FontAwesomeIcon icon={faChevronDown}/>
             </div>
 
@@ -76,33 +79,27 @@ export default function Balance() {
                      <table className={styles.uiTableProfiles}>
                         <thead>
                         <tr>
-                           <th style={{borderTop: 'none', borderLeft: 'none'}}></th>
-                           <th>Стандарт</th>
-                           <th>Голд</th>
-                           <th>VIP</th>
+                           <th style={{borderTop: 'none', borderLeft: 'none'}}>{trans.balance.header.blank}</th>
+                           <th>{trans.balance.header.standart}</th>
+                           <th>{trans.balance.header.gold}</th>
+                           <th>{trans.balance.header.vip}</th>
                         </tr>
                         </thead>
                         <tfoot>
                         <tr>
-                           <td>
-                              Стоимость <b>1 месяца</b> размещения на сайте night-kiev.com
-                           </td>
+                           <td>{trans.balance.prices.month1}</td>
                            <td>{planInfo.standart[0]}$</td>
                            <td>{planInfo.gold[0]}$</td>
                            <td>{planInfo.vip[0]}$</td>
                         </tr>
                         <tr>
-                           <td>
-                              Стоимость <b>2 месяцев</b> размещения на сайте night-kiev.com
-                           </td>
+                           <td>{trans.balance.prices.month2}</td>
                            <td>{planInfo.standart[1]}$</td>
                            <td>{planInfo.gold[1]}$</td>
                            <td>{planInfo.vip[1]}$</td>
                         </tr>
                         <tr>
-                           <td>
-                              Стоимость <b>3 месяцев</b> размещения на сайте night-kiev.com
-                           </td>
+                           <td>{trans.balance.prices.month3}</td>
                            <td>{planInfo.standart[2]}$</td>
                            <td>{planInfo.gold[2]}$</td>
                            <td>{planInfo.vip[2]}$</td>
@@ -110,68 +107,34 @@ export default function Balance() {
                         </tfoot>
                         <tbody>
                         <tr>
-                           <td>
-                              Показ анкет на сайте night-kiev.com
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
+                           <td>{trans.balance.features.showProfiles}</td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
                         </tr>
                         <tr>
-                           <td>
-                              Показ БОЛЬШИХ фото
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
+                           <td>{trans.balance.features.bigPhotos}</td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
                         </tr>
                         <tr>
-                           <td>Показ видео</td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
+                           <td>{trans.balance.features.video}</td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
                         </tr>
                         <tr>
-                           <td>Значок VIP</td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
+                           <td>{trans.balance.features.vipBadge}</td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
                         </tr>
                         <tr>
-                           <td>Высшая приоритетность в выдаче</td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faMinus}/>
-                           </td>
-                           <td style={{textAlign: 'center'}}>
-                              <FontAwesomeIcon icon={faPlus}/>
-                           </td>
+                           <td>{trans.balance.features.topPriority}</td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faMinus}/></td>
+                           <td style={{textAlign: 'center'}}><FontAwesomeIcon icon={faPlus}/></td>
                         </tr>
                         </tbody>
                      </table>
@@ -180,21 +143,22 @@ export default function Balance() {
             )}
          </div>
 
+
          <div className={styles.faqItem}>
             <div className={styles.faqTitle} onClick={() => setOpenTopups(!openTopups)}>
-               <span className={styles.faqTitleText}>История пополнений</span>
-               <FontAwesomeIcon icon={faChevronDown}/>
+               <span className={styles.faqTitleText}>{trans.balance.depositTitle}</span>
+               <FontAwesomeIcon icon={faChevronDown} />
             </div>
 
             {openTopups && (
                <div className={styles.historyContainer}>
                   {deposits.length === 0 ? (
-                     <p>История пополнений пуста</p>
+                     <p>{trans.balance.depositEmpty}</p>
                   ) : (
                      deposits.map((item, idx) => (
                         <div key={idx} className={styles.historyItem}>
                            <div className={styles.historyAmount}>
-                              <FontAwesomeIcon icon={faPlus} style={{marginRight: '5px', fontSize: '.9em'}}/>
+                              <FontAwesomeIcon icon={faPlus} style={{marginRight: '5px', fontSize: '.9em'}} />
                               {item.amount} USD
                            </div>
                            <div className={styles.historyTime}>
@@ -209,19 +173,19 @@ export default function Balance() {
 
          <div className={styles.faqItem}>
             <div className={styles.faqTitle} onClick={() => setOpenWithdraws(!openWithdraws)}>
-               <span className={styles.faqTitleText}>История списаний</span>
-               <FontAwesomeIcon icon={faChevronDown}/>
+               <span className={styles.faqTitleText}>{trans.balance.withdrawTitle}</span>
+               <FontAwesomeIcon icon={faChevronDown} />
             </div>
 
             {openWithdraws && (
                <div className={styles.historyContainer}>
                   {withdraws.length === 0 ? (
-                     <p>История списаний пуста</p>
+                     <p>{trans.balance.withdrawEmpty}</p>
                   ) : (
                      withdraws.map((item, idx) => (
                         <div key={idx} className={styles.historyItem}>
                            <div className={styles.historyAmount}>
-                              <FontAwesomeIcon icon={faMinus} style={{marginRight: '5px', fontSize: '.9em'}}/>
+                              <FontAwesomeIcon icon={faMinus} style={{marginRight: '5px', fontSize: '.9em'}} />
                               {item.amount} USD
                            </div>
 
@@ -239,10 +203,11 @@ export default function Balance() {
             )}
          </div>
 
-         <Button type="trans" style={{color: '#333', margin: 0}}>
-            <FontAwesomeIcon icon={faPlus}/>
-            Пополнить баланс
+         <Button type="trans" style={{color: '#333', margin: 0}} onClick={() => window.location.href = tgBotUrl + '?start=topup'}>
+            <FontAwesomeIcon icon={faPlus} />
+            {trans.balance.topUp}
          </Button>
+
 
       </div>
    )
