@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using sxkiev.Data;
+using sxkiev.Models;
 using sxkiev.Repositories.Generic;
 using sxkiev.Services.Plan;
 
@@ -40,9 +41,9 @@ public class PlanController : ControllerBase
 
     [HttpPut]
     [Authorize(Roles = "admin")]
-    public async Task<IActionResult> UpdatePlan([FromBody] ProfilePlan plan)
+    public async Task<IActionResult> UpdatePlan([FromBody] UpdatePlansInputModel plans)
     {
-        await _planService.UpdateProfileAsync(plan);
+        await _planService.UpdatePlansAsync(plans);
         return Ok();
     }
 

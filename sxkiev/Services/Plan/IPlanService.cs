@@ -7,6 +7,6 @@ public interface IPlanService
 {
     Task<IEnumerable<ProfilePlan>> GetPlans();
     Task<ProfilePlan?> GetProfileById(int profileId);
-    Task UpdateProfileAsync(ProfilePlan profile);
+    Task UpdatePlansAsync(UpdatePlansInputModel plans);
     Task<CurrentUserInfoResponseModel> GetUserInfo(long userId);
 }

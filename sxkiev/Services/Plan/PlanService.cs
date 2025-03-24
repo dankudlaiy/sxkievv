@@ -32,9 +32,19 @@ public class PlanService : IPlanService
         return await _profilePlanRepository.FirstOrDefaultAsync(x => x.Id == profileId);
     }
 
-    public async Task UpdateProfileAsync(ProfilePlan profile)
+    public async Task UpdatePlansAsync(UpdatePlansInputModel plans)
     {
-        await _profilePlanRepository.UpdateAsync(profile);
+        foreach (var plan in plans.Plans)
+        {
+            var existing = await _profilePlanRepository.FirstOrDefaultAsync(x => x.Id == plan.Id);
+            
+            if (existing is null) continue;
+            
+            existing.Duration = plan.Duration;
+            existing.Price = plan.Price;
+            
+            await _profilePlanRepository.UpdateAsync(existing);
+        }
     }
 
     public async Task<CurrentUserInfoResponseModel> GetUserInfo(long userId)
