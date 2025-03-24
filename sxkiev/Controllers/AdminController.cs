@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using sxkiev.Models;
 using sxkiev.Services.Profile;
@@ -74,6 +75,16 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> UpdateProfile([FromQuery] Guid id, [FromBody] UpdateProfileInputModel profile)
     {
         await _profileService.UpdateProfileAsync(id, profile, true);
+        return NoContent();
+    }
+    
+    [HttpPut("renew")]
+    public async Task<IActionResult> RenewProfile([FromQuery] Guid id, [FromQuery] int days)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return BadRequest();
+
+        await _profileService.AdminRenewProfileAsync(id, days);
         return NoContent();
     }
 

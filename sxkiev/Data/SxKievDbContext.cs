@@ -19,6 +19,7 @@ public class SxKievDbContext : DbContext
     public DbSet<ProfilePlan> ProfilePlans { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<ProfileAction> ProfileActions { get; set; }
+    public DbSet<SiteOptions> SiteOptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

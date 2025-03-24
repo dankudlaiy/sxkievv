@@ -313,8 +313,7 @@ public class ProfileService : IProfileService
             profile.PlanId = inputModel.PlanId.Value;
         }
 
-        if (inputModel.Status is not null &&
-            (!isAdmin && profile.Status is ProfileStatus.Active or ProfileStatus.Hidden &&
+        if (inputModel.Status is not null && (profile.Status is ProfileStatus.Active or ProfileStatus.Hidden &&
                 inputModel.Status is ProfileStatus.Active or ProfileStatus.Hidden || isAdmin))
         {
             profile.Status = inputModel.Status.Value;
@@ -391,7 +390,7 @@ public class ProfileService : IProfileService
         if (user.Balance < plan.Price) throw new Exception("Not enough balance");
 
         user.Balance -= plan.Price;
-        
+
         var start = DateTime.UtcNow;
 
         if (profile.ExpirationDate > start)
@@ -404,6 +403,20 @@ public class ProfileService : IProfileService
         await _profileRepository.UpdateAsync(profile);
         
         await _userRepository.UpdateAsync(user);
+    }
+    
+    public async Task AdminRenewProfileAsync(Guid id, int days)
+    {
+        var profile = await _profileRepository
+            .Query(x => x.Id == id)
+            .Include(x => x.Plan)
+            .FirstOrDefaultAsync();
+        
+        if (profile is null) throw new Exception("Profile not found");
+
+        profile.ExpirationDate = DateTime.UtcNow.AddDays(days);
+        
+        await _profileRepository.UpdateAsync(profile);
     }
 
     public async Task<SxKievProfile> AddProfileAsync(SxKievProfile profile)

@@ -10,62 +10,73 @@ public class SeedData
         {
             dbContext.ProfilePlans.AddRange(new List<ProfilePlan>
             {
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Basic,
                     Duration = 1,
                     Price = 50
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Basic,
                     Duration = 2,
                     Price = 90
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Basic,
                     Duration = 3,
                     Price = 120
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Gold,
                     Duration = 1,
                     Price = 70
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Gold,
                     Duration = 2,
                     Price = 120
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Gold,
                     Duration = 3,
                     Price = 160
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Vip,
                     Duration = 1,
                     Price = 100
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Vip,
                     Duration = 2,
                     Price = 180
                 },
-                new ProfilePlan
+                new()
                 {
                     Type = ProfileType.Vip,
                     Duration = 3,
                     Price = 250
-                },
+                }
             });
 
+            await dbContext.SaveChangesAsync();
+        }
+        
+        if (!dbContext.SiteOptions.Any())
+        {
+            dbContext.SiteOptions.Add(new SiteOptions
+            {
+                SupportUrl = "https://t.me/sxkiev",
+                TgBotUrl = "https://t.me/sxkiev_bot"
+            });
+            
             await dbContext.SaveChangesAsync();
         }
     }

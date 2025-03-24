@@ -10,7 +10,8 @@ public interface IProfileService
     Task<SearchProfilesResponseModel> SearchProfilesAsync(SearchProfilesInputModel input);
     Task<ProfileResponseModel?> GetProfileAsync(Guid id);
     Task UpdateProfileAsync(Guid id, UpdateProfileInputModel inputModel, bool isAdmin = false);
-    Task RenewProfileAsync(Guid id, long userId, int months);
+    Task RenewProfileAsync(Guid id, long userId, int days);
+    Task AdminRenewProfileAsync(Guid id, int days);
     Task<SxKievProfile> AddProfileAsync(SxKievProfile profile);
     Task AddAction(Guid profileId, ActionInputModel inputModel);
     Task DeleteProfileAsync(Guid id);

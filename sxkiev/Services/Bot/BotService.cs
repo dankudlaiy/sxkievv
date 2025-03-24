@@ -30,25 +30,22 @@ public class BotService : IBotService
         };
     }
 
-    public async Task CreateDep(long userId, double amount)
+    public async Task<Dep> CreateDep(long userId, double amount, string method)
     {
+        var user = await _userRepository.FirstOrDefaultAsync(x => x.TelegramId == userId);
+        
+        if (user is null) throw new Exception("User not found");
+        
         var dep = new Dep
         {
             UserId = userId,
-            Amount = amount
+            Amount = amount,
+            Method = method
         };
         
         await _depRepository.AddAsync(dep);
-    }
-
-    public async Task<Dep> AddMethod(long userId, string method)
-    {
-        var dep = await _depRepository.FirstOrDefaultAsync(x => x.UserId == userId && x.IsRejected != true && x.IsApproved != true);
         
-        if (dep is null) throw new Exception("No deposit found");
-        
-        dep.Method = method;
-        await _depRepository.UpdateAsync(dep);
+        dep.User = user;
 
         return dep;
     }

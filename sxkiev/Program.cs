@@ -15,6 +15,11 @@ using sxkiev.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
+
 builder.Services.AddHostedService<BotHostedService>();
 builder.Services.AddHostedService<DailyJobHostedService>();
 

@@ -4,6 +4,7 @@ using sxkiev.Services.Bot;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
@@ -30,6 +31,17 @@ public class BotHostedService : BackgroundService
         _serviceProvider = serviceProvider;
         _botClient = new TelegramBotClient(configuration["BotToken"]!);
         _adminChatId = long.Parse(configuration["AdminChatId"]!);
+    }
+    
+    private static ReplyKeyboardMarkup GetMainReplyKeyboard()
+    {
+        return new ReplyKeyboardMarkup([
+            ["Авторизация", "Профиль"]
+        ])
+        {
+            ResizeKeyboard = true,
+            OneTimeKeyboard = false
+        };
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -78,14 +90,13 @@ public class BotHostedService : BackgroundService
                 await botClient.SendMessage(
                     chatId: update.Message.Chat.Id,
                     text: token,
+                    replyMarkup: GetMainReplyKeyboard(),
                     cancellationToken: cancellationToken);
                 
                 var userProfile = await botService.GetUserProfile(update.Message.From!.Id);
 
                 var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
-                var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
-                    Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
-                        "replenish_start"));
+                var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Пополнить баланс", "replenish_start"));
 
                 await _botClient.SendMessage(
                     update.Message.Chat.Id,
@@ -96,7 +107,7 @@ public class BotHostedService : BackgroundService
                 return;
             }
             
-            if (update.Message?.Text == "/auth")
+            if (update.Message?.Text is "/auth" or "Авторизация")
             {
                 var token = await authService.CreateLoginLink(new CreateLoginLinkInputModel
                 {
@@ -114,14 +125,12 @@ public class BotHostedService : BackgroundService
                 return;
             }
 
-            if (update.Message?.Text == "/profile")
+            if (update.Message?.Text is "/profile" or "Профиль")
             {
                 var userProfile = await botService.GetUserProfile(update.Message.From!.Id);
 
                 var text = $"👤 Пользователь: {userProfile.Username}\n💵 Баланс: {userProfile.Balance}\n\nНажмите кнопку ниже, чтобы пополнить баланс";
-                var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
-                    Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Пополнить баланс",
-                        "replenish_start"));
+                var keyboard = new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Пополнить баланс", "replenish_start"));
 
                 await _botClient.SendMessage(
                     update.Message.Chat.Id,
@@ -132,7 +141,7 @@ public class BotHostedService : BackgroundService
                 return;
             }
 
-            if (GetUserState(userId) == States.UahDep)
+            if (GetUserState(userId) == States.UahDep || GetUserState(userId) == States.CryptoDep)
             {
                 if (!double.TryParse(update.Message!.Text, out var amount))
                 {
@@ -152,42 +161,24 @@ public class BotHostedService : BackgroundService
                     return;
                 }
 
-                await botService.CreateDep(update.Message!.From.Id, amount);
+                var dep = await botService.CreateDep(update.Message!.From.Id, amount, GetUserState(userId) == States.UahDep ? "uah" : "crypto");
 
                 await _botClient.SendMessage(
                     update.Message.Chat.Id,
-                    "Введите метод оплаты:",
+                    "Запрос на пополнение создан, ожидайте реквизиты.",
                     cancellationToken: cancellationToken);
-
-                SetUserState(userId, States.Method);
-                return;
-            }
-
-            if (GetUserState(userId) == States.Method)
-            {
-                ClearUserState(userId);
-
-                var dep = await botService.AddMethod(update.Message!.From.Id, update.Message.Text);
-                var userProfile = await botService.GetUserProfile(update.Message!.From!.Id);
-
-                await _botClient.SendMessage(
-                    update.Message.Chat.Id,
-                    "Деп создан, ждите реквизиты",
-                    cancellationToken: cancellationToken);
-
+                
                 var adminRequestMessage =
                     $"Запрос на пополнение:\n" +
-                    $"👤 Пользователь: {userProfile.Username}\n" +
+                    $"👤 Пользователь: @{dep.User.Username}\n" +
                     $"💵 Сумма: {dep.Amount}\n" +
                     $"📅 Дата: {DateTime.UtcNow}\n" +
                     $"Метод оплаты: {dep.Method}\n";
 
-                var adminKeyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup([
+                var adminKeyboard = new InlineKeyboardMarkup([
                     [
-                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Выдать реквизиты",
-                            $"approve_replenish_{dep.Id}"),
-                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Отклонить",
-                            $"deny_replenish_{dep.Id}")
+                        InlineKeyboardButton.WithCallbackData("Выдать реквизиты", $"approve_replenish_{dep.Id}"),
+                        InlineKeyboardButton.WithCallbackData("Отклонить", $"deny_replenish_{dep.Id}")
                     ]
                 ]);
 
@@ -196,7 +187,8 @@ public class BotHostedService : BackgroundService
                     text: adminRequestMessage,
                     replyMarkup: adminKeyboard,
                     cancellationToken: cancellationToken);
-
+                
+                ClearUserState(userId);
                 return;
             }
 
@@ -209,7 +201,7 @@ public class BotHostedService : BackgroundService
                 
                 await botClient.SendMessage(
                     chatId: dep.ChatId,
-                    text: $"Реквизиты: {dep.Details}",
+                    text: $"👤 Реквизиты: {dep.Details}\n💵 Сумма: {dep.Amount}$",
                     cancellationToken: cancellationToken);
                 
                 var adminRequestMessage =
@@ -220,12 +212,10 @@ public class BotHostedService : BackgroundService
                     $"Метод оплаты: {dep.Method}\n" +
                     $"Реквизиты: {dep.Details}\n";
                 
-                var adminKeyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup([
+                var adminKeyboard = new InlineKeyboardMarkup([
                     [
-                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Подтвердить оплату",
-                            $"approve_dep_{dep.Id}"),
-                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("Отклонить",
-                            $"deny_replenish_{dep.Id}")
+                        InlineKeyboardButton.WithCallbackData("Подтвердить оплату", $"approve_dep_{dep.Id}"),
+                        InlineKeyboardButton.WithCallbackData("Отклонить", $"deny_replenish_{dep.Id}")
                     ]
                 ]);
                 
@@ -244,10 +234,10 @@ public class BotHostedService : BackgroundService
             {
                 SetUserState(userId, States.Method);
 
-                var adminKeyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup([
+                var adminKeyboard = new InlineKeyboardMarkup([
                     [
-                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("uah", "uah"),
-                        Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("crypto", "crypto")
+                        InlineKeyboardButton.WithCallbackData("uah", "uah"),
+                        InlineKeyboardButton.WithCallbackData("crypto", "crypto")
                     ]
                 ]);
                 
@@ -263,13 +253,23 @@ public class BotHostedService : BackgroundService
 
             if (update.CallbackQuery?.Data == "uah")
             {
-                // "Введите сумму, которую вы хотите пополнить:",
+                await _botClient.EditMessageText(
+                    update.CallbackQuery.Message!.Chat.Id,
+                    update.CallbackQuery.Message.Id, 
+                    "Введите сумму в долларах, которую вы хотите пополнить:",
+                    cancellationToken: cancellationToken);
+                
                 SetUserState(userId, States.UahDep);
             }
 
             if (update.CallbackQuery?.Data == "crypto")
             {
-                // "Введите сумму, которую вы хотите пополнить:",
+                await _botClient.EditMessageText(
+                    update.CallbackQuery.Message!.Chat.Id,
+                    update.CallbackQuery.Message.Id, 
+                    "Введите сумму в долларах, которую вы хотите пополнить:",
+                    cancellationToken: cancellationToken);
+                
                 SetUserState(userId, States.CryptoDep);
             }
 
@@ -298,12 +298,12 @@ public class BotHostedService : BackgroundService
                 await botClient.EditMessageText(
                     chatId: _adminChatId,
                     messageId: update.CallbackQuery.Message!.MessageId,
-                    text: $"Деп на {dep.Amount} юзеру {dep.Username} был подтвержден",
+                    text: $"Пополнение на {dep.Amount} юзеру @{dep.Username} было подтверждено",
                     cancellationToken: cancellationToken);
                 
                 await botClient.SendMessage(
                     chatId: dep.ChatId,
-                    text: $"Деп на {dep.Amount} был подтвержден",
+                    text: $"Пополнение на {dep.Amount} был подтверждено",
                     cancellationToken: cancellationToken);
             }
 
@@ -332,12 +332,12 @@ public class BotHostedService : BackgroundService
                 await botClient.EditMessageText(
                     chatId: _adminChatId,
                     messageId: update.CallbackQuery.Message!.MessageId,
-                    text: $"Деп на {dep.Amount} юзеру {dep.Username} был отклонен",
+                    text: $"Пополнение на {dep.Amount} юзеру @{dep.Username} было отклонено",
                     cancellationToken: cancellationToken);
                 
                 await botClient.SendMessage(
                     chatId: dep.ChatId,
-                    text: $"Деп на {dep.Amount} был отклонен",
+                    text: $"Пополнение на {dep.Amount} был отклонено",
                     cancellationToken: cancellationToken);
             }
             
