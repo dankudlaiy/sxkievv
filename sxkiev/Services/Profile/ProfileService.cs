@@ -96,17 +96,17 @@ public class ProfileService : IProfileService
     {
         var query = _actionRepository
             .Query(x => x.ProfileId == profileId && x.Action == action)
-            .GroupBy(x => x.Date)
+            .GroupBy(x => x.Date.Date)
             .OrderByDescending(x => x.Key)
             .Select(x => new ActionResponseModel
             {
                 Date = x.Key,
-                Action = action,
                 Count = x.Count()
             });
         
         var responseModel = new ActionsResponseModel
         {
+            Action = action,
             Actions = await query.ToListAsync()
         };
         
@@ -118,24 +118,49 @@ public class ProfileService : IProfileService
         var query = _profileRepository.Query(x =>
             x.Status == ProfileStatus.Active && x.ExpirationDate > DateTime.UtcNow);
 
-        if (input.MinPrice is not null && input.MaxPrice is not null)
+        if (input.MinPrice is not null)
         {
-            query = query.Where(x => x.HourPrice >= input.MinPrice && x.HourPrice <= input.MaxPrice);
+            query = query.Where(x => x.HourPrice >= input.MinPrice);
+        }
+
+        if (input.MaxPrice is not null)
+        {
+            query = query.Where(x => x.HourPrice <= input.MaxPrice);
         }
 
         if (input.MinAge is not null && input.MaxAge is not null)
         {
-            query = query.Where(x => x.Age >= input.MinAge && x.Age <= input.MaxAge);
+            query = query.Where(x => x.Age >= input.MinAge);
         }
 
-        if (input.MinHeight is not null && input.MaxHeight is not null)
+        if (input.MaxAge is not null)
         {
-            query = query.Where(x => x.Height >= input.MinHeight && x.Height <= input.MaxHeight);
+            query = query.Where(x => x.Age <= input.MaxAge);
+        }
+
+        if (input.MinHeight is not null)
+        {
+            query = query.Where(x => x.Height >= input.MinHeight);
+        }
+
+        if (input.MaxHeight is not null)
+        {
+            query = query.Where(x => x.Height <= input.MaxHeight);
         }
 
         if (input.MinWeight is not null && input.MaxWeight is not null)
         {
-            query = query.Where(x => x.Weight >= input.MinWeight && x.Weight <= input.MaxWeight);
+            query = query.Where(x => x.Weight >= input.MinWeight);
+        }
+
+        if (input.MaxWeight is not null)
+        {
+            query = query.Where(x => x.Weight <= input.MaxWeight);
+        }
+
+        if (input.BreastSize is not null)
+        {
+            query = query.Where(x => x.Breast == input.BreastSize);
         }
 
         if (input.Apartment is true)
@@ -309,16 +334,23 @@ public class ProfileService : IProfileService
 
             if (DateTime.UtcNow < profile.ExpirationDate)
             {
-                var daysLeft = (profile.ExpirationDate - DateTime.UtcNow).Days;
-                var oldPricePerDay = oldPlan.Price / oldPlan.Duration * 30;
-                var newPricePerDay = plan.Price / plan.Duration * 30;
+                var daysLeft = profile.ExpirationDate - DateTime.UtcNow;
+                var oldPricePerDay = oldPlan.Price /(double) oldPlan.Duration * 30;
+                var newPricePerDay = plan.Price /(double) plan.Duration * 30;
 
                 var cof = oldPricePerDay / newPricePerDay;
                 var newDaysLeft = daysLeft * cof;
-                profile.ExpirationDate = DateTime.UtcNow.AddDays(newDaysLeft);
+                profile.ExpirationDate = DateTime.UtcNow.Add(newDaysLeft);
             }
 
             profile.PlanId = inputModel.PlanId.Value;
+        }
+
+        if (inputModel.Status is not null && profile.Status != ProfileStatus.Banned && profile.Status != ProfileStatus.Pending &&
+            profile.Status != ProfileStatus.Rejected && profile.Status != ProfileStatus.Expired &&
+            inputModel.Status is ProfileStatus.Active or ProfileStatus.Hidden)
+        {
+            profile.Status = inputModel.Status.Value;
         }
 
         if (inputModel.Districts is not null)

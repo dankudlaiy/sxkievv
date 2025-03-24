@@ -58,7 +58,6 @@ public class BotHostedService : BackgroundService
         {
             userId = update.Message!.From!.Id;
             var username = update.Message.From.Username;
-            var fullName = update.Message.From.FirstName + " " + update.Message.From.LastName;
             
             using var scope = _serviceProvider.CreateScope();
             var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
@@ -322,28 +321,18 @@ public class BotHostedService : BackgroundService
         return Task.CompletedTask;
     }
 
-    private void SetUserState(long userId, string state)
+    private static void SetUserState(long userId, string state)
     {
-        if (UserStates.ContainsKey(userId))
-        {
-            UserStates[userId] = state; // Обновляем состояние
-        }
-        else
-        {
-            UserStates.Add(userId, state); // Добавляем новое состояние
-        }
+        UserStates[userId] = state;
     }
 
-    private string? GetUserState(long userId)
+    private static string? GetUserState(long userId)
     {
-        return UserStates.TryGetValue(userId, out var state) ? state : null;
+        return UserStates.GetValueOrDefault(userId);
     }
 
-    private void ClearUserState(long userId)
+    private static void ClearUserState(long userId)
     {
-        if (UserStates.ContainsKey(userId))
-        {
-            UserStates.Remove(userId);
-        }
+        UserStates.Remove(userId);
     }
 }
